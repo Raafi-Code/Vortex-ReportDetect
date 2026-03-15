@@ -48,8 +48,8 @@ Alur: **GitHub → VPS (Git Clone)**
 1. **SSH ke VPS kamu**.
 2. **Clone repositori**:
    ```bash
-   git clone https://github.com/username-kamu/BNI-Whatsapp-ReportDetect.git
-   cd BNI-Whatsapp-ReportDetect/backend
+   git clone https://github.com/username-kamu/Whatsapp-ReportDetect.git
+   cd Whatsapp-ReportDetect/backend
    ```
 3. **Install & Setup**:
    ```bash
@@ -66,6 +66,7 @@ Alur: **GitHub → VPS (Git Clone)**
    ```bash
    git pull origin main
    pm2 restart bni-wa-reportdetect
+   pm2 stop all #untuk menonaktifkan session
    ```
 
 ---
