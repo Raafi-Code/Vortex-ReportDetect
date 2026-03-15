@@ -1,0 +1,25 @@
+{
+  "name": "bni-whatsapp-reportdetect-backend",
+  "version": "1.0.0",
+  "description": "WhatsApp message monitoring & forwarding backend with Baileys",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch-path=src src/index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.99.1",
+    "@whiskeysockets/baileys": "^7.0.0-rc.9",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "node-cron": "^3.0.3",
+    "pino": "^9.6.0",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

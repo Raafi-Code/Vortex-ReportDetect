@@ -1,0 +1,101 @@
+# 🚀 Panduan Deployment: Local → GitHub → Produksi
+
+Dokumen ini menjelaskan alur kerja untuk mengunggah proyek ke GitHub dan cara men-deploy-nya ke VPS (Backend) serta Vercel (Frontend) dari satu repositori yang sama (Monorepo).
+
+---
+
+## 📂 Strategi Unggah GitHub: Monorepo
+
+**Rekomendasi Utama**: Gunakan **Satu (1) Folder Induk** (`BNI-Whatsapp-ReportDetect`) sebagai satu repositori GitHub.
+
+**Mengapa?**
+- **Sinkronisasi**: Versi backend dan frontend selalu sejalan.
+- **Kemudahan**: Cukup satu kali `git push` untuk seluruh perubahan sistem.
+- **Dukungan Vercel**: Vercel mendukung penuh struktur monorepo (bisa memilih sub-folder).
+
+---
+
+## 📤 Tahap 1: Mengunggah ke GitHub
+
+Pastikan kamu berada di folder root `BNI-Whatsapp-ReportDetect` di terminal kamu.
+
+1. **Inisialisasi Git**:
+   ```bash
+   git init
+   ```
+2. **Tambahkan semua file** (File rahasia seperti `.env` dan `sessions/` akan otomatis diabaikan karena `.gitignore` sudah saya buat):
+   ```bash
+   git add .
+   ```
+3. **Commit pertama**:
+   ```bash
+   git commit -m "Initial commit: WhatsApp Report System"
+   ```
+4. **Hubungkan ke repositori GitHub baru kamu**:
+   ```bash
+   # Buat repo kosong di github.com, lalu jalankan:
+   git remote add origin https://github.com/username-kamu/BNI-Whatsapp-ReportDetect.git
+   git branch -M main
+   git push -u origin main
+   ```
+
+---
+
+## 💻 Tahap 2: Deploy Backend ke VPS
+
+Alur: **GitHub → VPS (Git Clone)**
+
+1. **SSH ke VPS kamu**.
+2. **Clone repositori**:
+   ```bash
+   git clone https://github.com/username-kamu/BNI-Whatsapp-ReportDetect.git
+   cd BNI-Whatsapp-ReportDetect/backend
+   ```
+3. **Install & Setup**:
+   ```bash
+   npm install
+   cp .env.example .env
+   nano .env # Masukkan Config & API_KEY rahasia
+   ```
+4. **Jalankan dengan PM2**:
+   ```bash
+   pm2 start ecosystem.config.cjs
+   pm2 save
+   ```
+5. **Update di Masa Depan**: Jika ada perubahan kode di local, kamu tekan `git push` di local, lalu di VPS cukup:
+   ```bash
+   git pull origin main
+   pm2 restart bni-wa-reportdetect
+   ```
+
+---
+
+## 🌐 Tahap 3: Deploy Frontend ke Vercel
+
+Alur: **GitHub → Vercel (Auto Connect)**
+
+1. Login ke [Vercel](https://vercel.com).
+2. Klik **New Project** → Connect ke repositori `BNI-Whatsapp-ReportDetect`.
+3. **KONFIGURASI PENTING**:
+   - **Root Directory**: Klik Edit, lalu pilih folder `frontend`.
+   - **Framework Preset**: Pilih `Next.js`.
+4. **Environment Variables**: Masukkan semua `NEXT_PUBLIC_...` yang diperlukan (Cek `DEPLOY.md` atau `SETUP.md`).
+5. Klik **Deploy**.
+6. **Update di Masa Depan**: Setiap kali kamu `git push` ke GitHub, Vercel akan otomatis meng-update website kamu (Auto Deployment).
+
+---
+
+## 🔑 Ringkasan API KEY & Endpoint
+
+| Komponen | Kegunaan | Lokasi |
+|---|---|---|
+| **API_KEY** | Keamanan antara Frontend & Backend | `backend/.env` & Vercel Env |
+| **SUPABASE_URL** | Koneksi Database | Keduanya |
+| **NEXT_PUBLIC_API_URL** | Alamat Backend di VPS | Vercel Env (Contoh: `http://IP_VPS:3001`) |
+
+---
+
+### Tips Keamanan 🛡️
+- Jangan pernah menghapus `.gitignore`.
+- Jangan pernah membagikan `API_KEY` atau `SUPABASE_SERVICE_KEY` ke orang lain.
+- Jika deploy di VPS, disarankan menggunakan Domain + SSL (Nginx Reverse Proxy) agar koneksi API lebih aman (HTTPS).
