@@ -1,4 +1,4 @@
-# WhatsApp ReportDetect 📡
+# Vortex ReportDetect 📡
 
 Sistem monitoring pesan WhatsApp & auto-forwarding. Mendengarkan pesan dari grup WhatsApp, memfilter berdasarkan keyword, menyimpan ke database, dan meneruskan otomatis ke grup/kontak tujuan.
 
