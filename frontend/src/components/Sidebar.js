@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   Inbox,
@@ -13,33 +14,40 @@ import {
   Wifi,
   WifiOff,
   Loader2,
-} from 'lucide-react';
-import { getStatus } from '@/lib/api';
+  X,
+} from "lucide-react";
+import { getStatus } from "@/lib/api";
+import { useLanguage } from "@/contexts/language-context";
 
 const navItems = [
-  { label: 'OVERVIEW', type: 'section' },
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/inbox', label: 'Inbox', icon: Inbox, showBadge: true },
-  { label: 'MANAGE', type: 'section' },
-  { href: '/groups', label: 'Groups', icon: Users },
-  { href: '/keywords', label: 'Keywords', icon: Hash },
-  { href: '/forwarding', label: 'Forwarding', icon: Forward },
-  { label: 'SYSTEM', type: 'section' },
-  { href: '/settings', label: 'Settings', icon: Settings },
+  { key: "overview", type: "section" },
+  { href: "/", key: "dashboard", icon: LayoutDashboard },
+  { href: "/inbox", key: "inbox", icon: Inbox, showBadge: true },
+  { key: "manage", type: "section" },
+  { href: "/groups", key: "groups", icon: Users },
+  { href: "/keywords", key: "keywords", icon: Hash },
+  { href: "/forwarding", key: "forwarding", icon: Forward },
+  { key: "system", type: "section" },
+  { href: "/settings", key: "settings", icon: Settings },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({
+  isOpen = false,
+  onClose = () => {},
+  collapsed = false,
+}) {
   const pathname = usePathname();
-  const [status, setStatus] = useState('disconnected');
+  const { text } = useLanguage();
+  const [status, setStatus] = useState("disconnected");
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     async function fetchStatus() {
       try {
         const res = await getStatus();
-        setStatus(res.data?.status || 'disconnected');
+        setStatus(res.data?.status || "disconnected");
       } catch {
-        setStatus('disconnected');
+        setStatus("disconnected");
       }
     }
 
@@ -54,45 +62,62 @@ export default function Sidebar() {
     disconnected: <WifiOff size={14} />,
   };
 
-  const statusText = {
-    open: 'Connected',
-    connecting: 'Connecting...',
-    disconnected: 'Disconnected',
-  };
+  const statusText = text.sidebar.status;
 
   return (
-    <aside className="sidebar">
+    <aside
+      className={`sidebar ${isOpen ? "open" : ""} ${collapsed ? "collapsed" : ""}`}
+    >
       <div className="sidebar-header">
+        <button
+          className="sidebar-close"
+          onClick={onClose}
+          aria-label={text.sidebar.actions.closeNavigation}
+        >
+          <X size={16} />
+        </button>
         <Link href="/" className="sidebar-logo">
-          <div className="sidebar-logo-icon">📡</div>
+          <div className="sidebar-logo-icon">
+            <Image
+              src="/bnitabbar.png"
+              alt="ATM Report"
+              width={32}
+              height={32}
+              className="sidebar-logo-image"
+              priority
+            />
+          </div>
           <div className="sidebar-logo-text">
-            <h1>ReportDetect</h1>
-            <span>WhatsApp Monitor</span>
+            <h1>{text.sidebar.appName}</h1>
+            <span>{text.sidebar.appSubtitle}</span>
           </div>
         </Link>
       </div>
 
       <nav className="sidebar-nav">
         {navItems.map((item, i) => {
-          if (item.type === 'section') {
+          if (item.type === "section") {
             return (
               <div key={i} className="nav-section-label">
-                {item.label}
+                {text.sidebar.sections[item.key]}
               </div>
             );
           }
 
           const Icon = item.icon;
           const isActive = pathname === item.href;
+          const itemLabel = text.sidebar.nav[item.key];
 
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`nav-link ${isActive ? 'active' : ''}`}
+              onClick={onClose}
+              className={`nav-link ${isActive ? "active" : ""}`}
+              title={itemLabel}
             >
               <Icon size={18} />
-              {item.label}
+              <span className="nav-link-label">{itemLabel}</span>
               {item.showBadge && unreadCount > 0 && (
                 <span className="nav-badge">{unreadCount}</span>
               )}
@@ -103,9 +128,13 @@ export default function Sidebar() {
 
       <div className="sidebar-footer">
         <div className="connection-status">
-          <span className={`status-dot ${status === 'open' ? 'connected' : status === 'connecting' ? 'connecting' : ''}`} />
+          <span
+            className={`status-dot ${status === "open" ? "connected" : status === "connecting" ? "connecting" : ""}`}
+          />
           {statusIcon[status]}
-          <span>{statusText[status] || 'Unknown'}</span>
+          <span className="connection-status-text">
+            {statusText[status] || statusText.unknown}
+          </span>
         </div>
       </div>
     </aside>

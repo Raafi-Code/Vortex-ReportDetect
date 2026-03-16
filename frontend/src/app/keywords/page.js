@@ -1,19 +1,47 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import { Hash, Plus, Trash2, RefreshCw, Tag } from "lucide-react";
 import {
-  Hash,
-  Plus,
-  Trash2,
-  RefreshCw,
-  Tag,
-} from 'lucide-react';
-import { getKeywords, addKeyword, updateKeyword, deleteKeyword } from '@/lib/api';
+  getKeywords,
+  addKeyword,
+  updateKeyword,
+  deleteKeyword,
+} from "@/lib/api";
+import { useLanguage } from "@/contexts/language-context";
 
 export default function KeywordsPage() {
+  const { language } = useLanguage();
+  const isId = language === "id";
   const [keywords, setKeywords] = useState([]);
+  const t = {
+    title: isId ? "Keywords" : "Keywords",
+    subtitle: isId
+      ? "Kelola keyword filter untuk mendeteksi pesan"
+      : "Manage filter keywords to detect messages",
+    addTitle: isId ? "Tambah Keyword Baru" : "Add New Keyword",
+    inputPlaceholder: isId
+      ? "Ketik keyword baru... (contoh: laporan, urgent, penting)"
+      : "Type new keyword... (example: report, urgent, important)",
+    adding: isId ? "Menambahkan..." : "Adding...",
+    add: isId ? "Tambah" : "Add",
+    listTitle: isId ? "Daftar Keyword" : "Keyword List",
+    noKeyword: isId ? "Belum ada keyword" : "No keywords yet",
+    noKeywordHint: isId
+      ? "Tambahkan keyword untuk mulai memfilter pesan"
+      : "Add keywords to start filtering messages",
+    addedAt: isId ? "Ditambahkan" : "Added",
+    status: isId ? "Status" : "Status",
+    action: isId ? "Aksi" : "Action",
+    delete: isId ? "Hapus" : "Delete",
+    deleteConfirm: isId ? "Hapus keyword ini?" : "Delete this keyword?",
+    addFailed: isId ? "Gagal menambahkan keyword" : "Failed to add keyword",
+    activeFrom: isId ? "aktif dari" : "active of",
+    locale: isId ? "id-ID" : "en-US",
+  };
+
   const [loading, setLoading] = useState(true);
-  const [newKeyword, setNewKeyword] = useState('');
+  const [newKeyword, setNewKeyword] = useState("");
   const [adding, setAdding] = useState(false);
 
   async function fetchKeywords() {
@@ -22,7 +50,7 @@ export default function KeywordsPage() {
       const res = await getKeywords();
       setKeywords(res.data || []);
     } catch (err) {
-      console.error('Failed to fetch keywords:', err);
+      console.error("Failed to fetch keywords:", err);
     } finally {
       setLoading(false);
     }
@@ -40,10 +68,10 @@ export default function KeywordsPage() {
     try {
       const res = await addKeyword(newKeyword.trim());
       setKeywords((prev) => [res.data, ...prev]);
-      setNewKeyword('');
+      setNewKeyword("");
     } catch (err) {
-      console.error('Failed to add keyword:', err);
-      alert('Gagal menambahkan keyword: ' + err.message);
+      console.error("Failed to add keyword:", err);
+      alert(`${t.addFailed}: ${err.message}`);
     } finally {
       setAdding(false);
     }
@@ -54,21 +82,21 @@ export default function KeywordsPage() {
       await updateKeyword(kw.id, { is_active: !kw.is_active });
       setKeywords((prev) =>
         prev.map((k) =>
-          k.id === kw.id ? { ...k, is_active: !k.is_active } : k
-        )
+          k.id === kw.id ? { ...k, is_active: !k.is_active } : k,
+        ),
       );
     } catch (err) {
-      console.error('Failed to toggle keyword:', err);
+      console.error("Failed to toggle keyword:", err);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Hapus keyword ini?')) return;
+    if (!confirm(t.deleteConfirm)) return;
     try {
       await deleteKeyword(id);
       setKeywords((prev) => prev.filter((k) => k.id !== id));
     } catch (err) {
-      console.error('Failed to delete keyword:', err);
+      console.error("Failed to delete keyword:", err);
     }
   };
 
@@ -83,42 +111,42 @@ export default function KeywordsPage() {
   }
 
   return (
-    <div className="animate-fade-in">
-      <div className="page-header">
-        <h2>Keywords</h2>
-        <p>Kelola keyword filter untuk mendeteksi pesan ({activeCount} aktif dari {keywords.length})</p>
-      </div>
+    <div className="animate-fade-in space-y-4 md:space-y-6">
+      <header className="space-y-1">
+        <h2 className="text-2xl font-extrabold tracking-tight md:text-3xl">
+          {t.title}
+        </h2>
+        <p className="text-sm text-[var(--text-muted)]">
+          {t.subtitle} ({activeCount} {t.activeFrom} {keywords.length})
+        </p>
+      </header>
 
-      {/* Add Keyword */}
-      <div className="card" style={{ marginBottom: '20px' }}>
-        <h3 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Plus size={18} /> Tambah Keyword Baru
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-4 md:p-5">
+        <h3 className="mb-3 flex items-center gap-2 text-base font-bold">
+          <Plus size={18} /> {t.addTitle}
         </h3>
-        <form onSubmit={handleAdd}>
-          <div className="input-group">
-            <input
-              type="text"
-              className="input"
-              placeholder="Ketik keyword baru... (contoh: laporan, urgent, penting)"
-              value={newKeyword}
-              onChange={(e) => setNewKeyword(e.target.value)}
-            />
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={adding || !newKeyword.trim()}
-            >
-              {adding ? 'Menambahkan...' : 'Tambah'}
-            </button>
-          </div>
+        <form onSubmit={handleAdd} className="flex flex-col gap-2 sm:flex-row">
+          <input
+            type="text"
+            className="input"
+            placeholder={t.inputPlaceholder}
+            value={newKeyword}
+            onChange={(e) => setNewKeyword(e.target.value)}
+          />
+          <button
+            type="submit"
+            className="btn btn-primary justify-center sm:w-auto"
+            disabled={adding || !newKeyword.trim()}
+          >
+            {adding ? t.adding : t.add}
+          </button>
         </form>
-      </div>
+      </section>
 
-      {/* Keywords List */}
-      <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Tag size={18} /> Daftar Keyword
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-4 md:p-5">
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <h3 className="flex items-center gap-2 text-base font-bold">
+            <Tag size={18} /> {t.listTitle}
           </h3>
           <button className="btn btn-secondary btn-sm" onClick={fetchKeywords}>
             <RefreshCw size={14} />
@@ -128,41 +156,82 @@ export default function KeywordsPage() {
         {keywords.length === 0 ? (
           <div className="empty-state">
             <Hash size={48} />
-            <h3>Belum ada keyword</h3>
-            <p>Tambahkan keyword untuk mulai memfilter pesan</p>
+            <h3>{t.noKeyword}</h3>
+            <p>{t.noKeywordHint}</p>
           </div>
         ) : (
           <>
-            {/* Tag Cloud */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '20px' }}>
-              {keywords.filter((k) => k.is_active).map((kw) => (
-                <span key={kw.id} className="tag tag-emerald" style={{ fontSize: '13px', padding: '6px 14px' }}>
-                  #{kw.keyword}
-                </span>
-              ))}
-              {keywords.filter((k) => !k.is_active).map((kw) => (
-                <span key={kw.id} className="tag" style={{ fontSize: '13px', padding: '6px 14px', background: 'var(--bg-tertiary)', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-                  #{kw.keyword}
-                </span>
+            <div className="mb-4 flex flex-wrap gap-2">
+              {keywords
+                .filter((k) => k.is_active)
+                .map((kw) => (
+                  <span
+                    key={kw.id}
+                    className="tag tag-emerald text-xs sm:text-sm"
+                  >
+                    #{kw.keyword}
+                  </span>
+                ))}
+              {keywords
+                .filter((k) => !k.is_active)
+                .map((kw) => (
+                  <span
+                    key={kw.id}
+                    className="tag text-xs text-[var(--text-muted)] line-through sm:text-sm"
+                    style={{ background: "var(--bg-tertiary)" }}
+                  >
+                    #{kw.keyword}
+                  </span>
+                ))}
+            </div>
+
+            <div className="space-y-3 md:hidden">
+              {keywords.map((kw) => (
+                <article
+                  key={kw.id}
+                  className="rounded-xl border border-[var(--border)] bg-[var(--bg-tertiary)] p-3"
+                >
+                  <p className="text-sm font-semibold">#{kw.keyword}</p>
+                  <p className="mt-1 text-xs text-[var(--text-muted)]">
+                    {t.addedAt}:{" "}
+                    {new Date(kw.created_at).toLocaleDateString(t.locale)}
+                  </p>
+                  <div className="mt-3 flex items-center justify-between">
+                    <label className="toggle">
+                      <input
+                        type="checkbox"
+                        checked={kw.is_active}
+                        onChange={() => handleToggle(kw)}
+                      />
+                      <span className="toggle-slider" />
+                    </label>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDelete(kw.id)}
+                      title={t.delete}
+                    >
+                      <Trash2 size={14} /> {t.delete}
+                    </button>
+                  </div>
+                </article>
               ))}
             </div>
 
-            {/* Table */}
-            <div className="table-container">
+            <div className="table-container hidden md:block">
               <table className="table">
                 <thead>
                   <tr>
                     <th>Keyword</th>
-                    <th>Status</th>
-                    <th>Ditambahkan</th>
-                    <th>Aksi</th>
+                    <th>{t.status}</th>
+                    <th>{t.addedAt}</th>
+                    <th>{t.action}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {keywords.map((kw) => (
                     <tr key={kw.id}>
                       <td>
-                        <span style={{ fontWeight: '600', fontSize: '14px' }}>
+                        <span style={{ fontWeight: "600", fontSize: "14px" }}>
                           #{kw.keyword}
                         </span>
                       </td>
@@ -176,14 +245,16 @@ export default function KeywordsPage() {
                           <span className="toggle-slider" />
                         </label>
                       </td>
-                      <td style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                        {new Date(kw.created_at).toLocaleDateString('id-ID')}
+                      <td
+                        style={{ fontSize: "13px", color: "var(--text-muted)" }}
+                      >
+                        {new Date(kw.created_at).toLocaleDateString(t.locale)}
                       </td>
                       <td>
                         <button
                           className="btn btn-danger btn-sm btn-icon"
                           onClick={() => handleDelete(kw.id)}
-                          title="Hapus"
+                          title={t.delete}
                         >
                           <Trash2 size={14} />
                         </button>
@@ -195,7 +266,7 @@ export default function KeywordsPage() {
             </div>
           </>
         )}
-      </div>
+      </section>
     </div>
   );
 }

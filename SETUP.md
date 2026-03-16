@@ -180,6 +180,7 @@ Di Vercel project **Settings** → **Environment Variables**, tambahkan:
 |-----|-------|
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://your-project-id.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | (anon key dari Supabase) |
+| `NEXT_PUBLIC_ALLOWED_LOGIN_EMAIL` | `bni.project.ryurex@gmail.com` |
 | `NEXT_PUBLIC_API_URL` | `http://your-vps-ip:3001` |
 | `NEXT_PUBLIC_API_KEY` | (API key yang sama dengan backend) |
 

@@ -1,21 +1,23 @@
-import './globals.css';
-import Sidebar from '@/components/Sidebar';
+import "./globals.css";
+import Providers from "@/components/providers";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: 'BNI WhatsApp ReportDetect - Dashboard',
-  description: 'WhatsApp message monitoring and auto-forwarding dashboard',
+  title: "ATM Report | BNI",
+  description: "WhatsApp message monitoring and auto-forwarding dashboard",
+  icons: {
+    icon: "/bnitabbar.png",
+    shortcut: "/bnitabbar.png",
+    apple: "/bnitabbar.png",
+  },
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="id">
+    <html lang="id" suppressHydrationWarning>
       <body>
-        <div className="app-layout">
-          <Sidebar />
-          <main className="main-content animate-fade-in">{children}</main>
-        </div>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
