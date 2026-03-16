@@ -79,8 +79,8 @@ export default function Sidebar({
         <Link href="/" className="sidebar-logo">
           <div className="sidebar-logo-icon">
             <Image
-              src="/bnitabbar.png"
-              alt="ATM Report"
+              src="/vortex.png"
+              alt="Vortex - ReportDetect"
               width={32}
               height={32}
               className="sidebar-logo-image"

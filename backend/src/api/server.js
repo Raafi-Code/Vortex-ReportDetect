@@ -20,7 +20,7 @@ export function createServer() {
       origin: [
         config.api.frontendUrl,
         "http://localhost:3000",
-        "https://bni-reportdetect.ryurex.com",
+        "https://vortex.ryurex.com",
       ],
       credentials: true,
     }),

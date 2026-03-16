@@ -1,4 +1,4 @@
-# BNI WhatsApp ReportDetect 📡
+# WhatsApp ReportDetect 📡
 
 Sistem monitoring pesan WhatsApp & auto-forwarding. Mendengarkan pesan dari grup WhatsApp, memfilter berdasarkan keyword, menyimpan ke database, dan meneruskan otomatis ke grup/kontak tujuan.
 
@@ -24,7 +24,7 @@ Frontend (Vercel)  ←→  Backend (VPS)  ←→  Supabase (Database + Storage)
 ## 📁 Struktur Proyek
 
 ```
-BNI-Whatsapp-ReportDetect/
+Whatsapp-ReportDetect/
 ├── backend/          # Node.js + Baileys (deploy ke VPS)
 ├── frontend/         # Next.js 15 (deploy ke Vercel)
 ├── database/         # SQL migration scripts

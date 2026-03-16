@@ -6,7 +6,7 @@ Dokumen ini menjelaskan alur kerja untuk mengunggah proyek ke GitHub dan cara me
 
 ## 📂 Strategi Unggah GitHub: Monorepo
 
-**Rekomendasi Utama**: Gunakan **Satu (1) Folder Induk** (`BNI-Whatsapp-ReportDetect`) sebagai satu repositori GitHub.
+**Rekomendasi Utama**: Gunakan **Satu (1) Folder Induk** (`Whatsapp-ReportDetect`) sebagai satu repositori GitHub.
 
 **Mengapa?**
 - **Sinkronisasi**: Versi backend dan frontend selalu sejalan.
@@ -17,7 +17,7 @@ Dokumen ini menjelaskan alur kerja untuk mengunggah proyek ke GitHub dan cara me
 
 ## 📤 Tahap 1: Mengunggah ke GitHub
 
-Pastikan kamu berada di folder root `BNI-Whatsapp-ReportDetect` di terminal kamu.
+Pastikan kamu berada di folder root `Whatsapp-ReportDetect` di terminal kamu.
 
 1. **Inisialisasi Git**:
    ```bash
@@ -34,7 +34,7 @@ Pastikan kamu berada di folder root `BNI-Whatsapp-ReportDetect` di terminal kamu
 4. **Hubungkan ke repositori GitHub baru kamu**:
    ```bash
    # Buat repo kosong di github.com, lalu jalankan:
-   git remote add origin https://github.com/username-kamu/BNI-Whatsapp-ReportDetect.git
+   git remote add origin https://github.com/username-kamu/Whatsapp-ReportDetect.git
    git branch -M main
    git push -u origin main
    ```
@@ -65,7 +65,7 @@ Alur: **GitHub → VPS (Git Clone)**
 5. **Update di Masa Depan**: Jika ada perubahan kode di local, kamu tekan `git push` di local, lalu di VPS cukup:
    ```bash
    git pull origin main
-   pm2 restart bni-wa-reportdetect
+   pm2 restart wa-reportdetect
    pm2 stop all #untuk menonaktifkan session
    ```
 
@@ -76,7 +76,7 @@ Alur: **GitHub → VPS (Git Clone)**
 Alur: **GitHub → Vercel (Auto Connect)**
 
 1. Login ke [Vercel](https://vercel.com).
-2. Klik **New Project** → Connect ke repositori `BNI-Whatsapp-ReportDetect`.
+2. Klik **New Project** → Connect ke repositori `Whatsapp-ReportDetect`.
 3. **KONFIGURASI PENTING**:
    - **Root Directory**: Klik Edit, lalu pilih folder `frontend`.
    - **Framework Preset**: Pilih `Next.js`.

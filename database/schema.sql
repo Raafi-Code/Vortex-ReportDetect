@@ -1,5 +1,5 @@
 -- ============================================
--- BNI WhatsApp Report Detect - Database Schema
+-- WhatsApp Report Detect - Database Schema
 -- Run this in Supabase SQL Editor
 -- ============================================
 

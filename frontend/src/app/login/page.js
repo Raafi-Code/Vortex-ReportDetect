@@ -31,7 +31,7 @@ export default function LoginPage() {
       ? "Login gagal, silakan coba lagi."
       : "Login failed, please try again.",
     secureAccess: isId ? "Akses Aman" : "Secure Access",
-    appName: "ATM Report",
+    appName: "Vortex - ReportDetect",
     subtitle: isId
       ? "Login dengan email Anda untuk membuka dashboard monitoring."
       : "Login using your email to open the monitoring dashboard.",
@@ -103,17 +103,19 @@ export default function LoginPage() {
       <div className="login-card w-full">
         <div className="login-heading">
           <div className="login-heading-top">
-            <Image
-              src="/logo bni.png"
-              alt="BNI logo"
-              width={100}
-              height={100}
-              className="login-logo"
-              priority
-            />
+            <div className="login-logo-text">
+              <Image
+                src="/vortex.png"
+                alt="Report logo"
+                width={100}
+                height={100}
+                className="login-logo"
+                priority
+              />
+              <h1>Vortex</h1>
+            </div>
             <p className="login-kicker">{t.secureAccess}</p>
           </div>
-          <h1>{t.appName}</h1>
           <p>{t.subtitle}</p>
         </div>
 

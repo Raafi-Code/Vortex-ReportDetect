@@ -15,7 +15,7 @@ export async function forwardMessage(sock, targetJid, messageInfo) {
   const safeText = (text || "").trim() || "(tanpa isi pesan)";
 
   const header = [
-    `BNI-ATM Report`,
+    `Vortex - ReportDetect`,
     `━━━━━━━━━━━━━━━━━`,
     `${senderName || "Unknown"}`,
     `${reportTime} WITA`,

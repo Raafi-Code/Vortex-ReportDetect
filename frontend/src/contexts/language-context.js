@@ -18,8 +18,8 @@ const dictionaries = {
       themeLight: "Terang",
     },
     sidebar: {
-      appName: "ATM Report",
-      appSubtitle: "BNI Monitoring",
+      appName: "Vortex - ReportDetect",
+      appSubtitle: "Report Monitoring",
       sections: {
         overview: "RINGKASAN",
         manage: "KELOLA",
@@ -50,7 +50,7 @@ const dictionaries = {
     },
     dashboard: {
       title: "Dashboard",
-      subtitle: "Ringkasan aktivitas ATM Report",
+      subtitle: "Ringkasan aktivitas Vortex - ReportDetect",
       stats: {
         totalMessages: "Total Pesan",
         unreadMessages: "Belum Dibaca",
@@ -76,7 +76,7 @@ const dictionaries = {
       },
     },
     footer: {
-      copyright: "© 2026 BLH - BNI KCU Banjarmasin",
+      copyright: "© 2026 BLH BMS",
       developedBy: "Developed by",
     },
   },
@@ -95,8 +95,8 @@ const dictionaries = {
       themeLight: "Light",
     },
     sidebar: {
-      appName: "ATM Report",
-      appSubtitle: "BNI Monitoring",
+      appName: "Vortex - ReportDetect",
+      appSubtitle: "Report Monitoring",
       sections: {
         overview: "OVERVIEW",
         manage: "MANAGE",
@@ -123,11 +123,11 @@ const dictionaries = {
         collapseSidebar: "Minimize sidebar",
         expandSidebar: "Expand sidebar",
       },
-      languageButton: "ID",
+      languageButton: "EN",
     },
     dashboard: {
       title: "Dashboard",
-      subtitle: "ATM Report activity summary",
+      subtitle: "Vortex - ReportDetect activity summary",
       stats: {
         totalMessages: "Total Messages",
         unreadMessages: "Unread",
@@ -153,7 +153,7 @@ const dictionaries = {
       },
     },
     footer: {
-      copyright: "© 2026 BLH - BNI KCU Banjarmasin",
+      copyright: "© 2026 BLH BMS",
       developedBy: "Developed by",
     },
   },

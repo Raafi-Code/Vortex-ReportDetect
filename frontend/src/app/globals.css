@@ -245,13 +245,10 @@ html, body {
 .sidebar-logo-icon {
   width: 40px;
   height: 40px;
-  background: #fff;
-  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border: 1px solid var(--border);
 }
 
 .sidebar-logo-image {
@@ -363,6 +360,7 @@ html, body {
 
 .app-footer {
   margin-top: 24px;
+  margin-bottom: 0;
   border-top: 1px solid var(--border);
   padding-top: 14px;
 }
@@ -1192,11 +1190,22 @@ html, body {
   justify-content: space-between;
   margin-bottom: 4px;
   margin-top: -10px;
+  gap: 12px;
+}
+
+.login-logo-text {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.login-logo-text h1 {
+  margin: 0;
 }
 
 .login-logo {
-  width: 100px;
-  height: 100px;
+  width: 50px;
+  height: 50px;
   object-fit: contain;
 }
 

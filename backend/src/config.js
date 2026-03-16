@@ -11,14 +11,12 @@ const config = {
     frontendUrl: process.env.FRONTEND_URL || "http://localhost:3000",
   },
   auth: {
-    allowedEmail: (
-      process.env.ALLOWED_LOGIN_EMAIL || "bni.project.ryurex@gmail.com"
-    )
+    allowedEmail: (process.env.ALLOWED_LOGIN_EMAIL || "vortex.admin@gmail.com")
       .trim()
       .toLowerCase(),
   },
   whatsapp: {
-    sessionName: process.env.SESSION_NAME || "bni-wa-session",
+    sessionName: process.env.SESSION_NAME || "wa-session",
   },
   storage: {
     bucket: "whatsapp-media",

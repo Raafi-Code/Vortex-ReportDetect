@@ -1,4 +1,4 @@
-# 📋 Panduan Setup - BNI WhatsApp ReportDetect
+# 📋 Panduan Setup - WhatsApp ReportDetect
 
 Panduan lengkap untuk men-deploy sistem WhatsApp ReportDetect.
 
@@ -74,7 +74,7 @@ npm -v   # 10.x.x
 ```bash
 # Via Git (jika menggunakan repo)
 git clone <your-repo-url>
-cd BNI-Whatsapp-ReportDetect/backend
+cd Whatsapp-ReportDetect/backend
 
 # Atau upload via SCP/SFTP
 # Hanya upload folder backend/
@@ -108,7 +108,7 @@ API_PORT=3001
 
 FRONTEND_URL=https://your-frontend.vercel.app
 
-SESSION_NAME=bni-wa-session
+SESSION_NAME=wa-session
 ```
 
 > ⚠️ **Penting**: Backend sekarang memvalidasi `Authorization: Bearer <Supabase access token>` dari user login, jadi tidak perlu `NEXT_PUBLIC_API_KEY` lagi di frontend.
@@ -120,7 +120,7 @@ SESSION_NAME=bni-wa-session
 pm2 start ecosystem.config.cjs
 
 # Lihat logs
-pm2 logs bni-wa-reportdetect
+pm2 logs wa-reportdetect
 
 # Lihat status
 pm2 status
@@ -133,7 +133,7 @@ pm2 save
 ### 2.6 Scan QR Code
 
 Saat pertama kali jalan, akan muncul QR Code di terminal:
-1. Jalankan `pm2 logs bni-wa-reportdetect`
+1. Jalankan `pm2 logs wa-reportdetect`
 2. QR Code akan muncul di terminal
 3. Buka WhatsApp → Menu (⋮) → **Perangkat Tertaut** → **Tautkan Perangkat**
 4. Scan QR Code di terminal
@@ -180,7 +180,7 @@ Di Vercel project **Settings** → **Environment Variables**, tambahkan:
 |-----|-------|
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://your-project-id.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | (anon key dari Supabase) |
-| `NEXT_PUBLIC_ALLOWED_LOGIN_EMAIL` | `bni.project.ryurex@gmail.com` |
+| `NEXT_PUBLIC_ALLOWED_LOGIN_EMAIL` | `vortex.admin@gmail.com` |
 | `NEXT_PUBLIC_API_URL` | `http://your-vps-ip:3001` |
 
 6. Klik **Deploy**
@@ -195,7 +195,7 @@ FRONTEND_URL=https://your-app.vercel.app
 
 Restart backend:
 ```bash
-pm2 restart bni-wa-reportdetect
+pm2 restart wa-reportdetect
 ```
 
 ---
@@ -277,10 +277,10 @@ sudo certbot --nginx -d api.yourdomain.com
 ```bash
 # Backend
 pm2 start ecosystem.config.cjs     # Start
-pm2 restart bni-wa-reportdetect     # Restart
-pm2 logs bni-wa-reportdetect        # Lihat logs
-pm2 stop bni-wa-reportdetect        # Stop
-pm2 delete bni-wa-reportdetect      # Hapus
+pm2 restart wa-reportdetect     # Restart
+pm2 logs wa-reportdetect        # Lihat logs
+pm2 stop wa-reportdetect        # Stop
+pm2 delete wa-reportdetect      # Hapus
 
 # Frontend (Development)
 cd frontend
@@ -289,5 +289,5 @@ npm run build                        # Build production
 
 # Hapus session WhatsApp (jika bermasalah)
 rm -rf backend/sessions/
-pm2 restart bni-wa-reportdetect
+pm2 restart wa-reportdetect
 ```

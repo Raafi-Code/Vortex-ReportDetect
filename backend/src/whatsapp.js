@@ -3,19 +3,19 @@ import makeWASocket, {
   DisconnectReason,
   makeCacheableSignalKeyStore,
   fetchLatestBaileysVersion,
-} from '@whiskeysockets/baileys';
-import { Boom } from '@hapi/boom';
-import pino from 'pino';
-import path from 'path';
-import fs from 'fs';
-import qrcodeTerminal from 'qrcode-terminal';
-import config from './config.js';
+} from "@whiskeysockets/baileys";
+import { Boom } from "@hapi/boom";
+import pino from "pino";
+import path from "path";
+import fs from "fs";
+import qrcodeTerminal from "qrcode-terminal";
+import config from "./config.js";
 
-const logger = pino({ level: 'silent' });
+const logger = pino({ level: "silent" });
 
 let sock = null;
 let qrCode = null;
-let connectionStatus = 'disconnected'; // disconnected | connecting | open
+let connectionStatus = "disconnected"; // disconnected | connecting | open
 
 /**
  * Get current WhatsApp socket instance
@@ -60,33 +60,34 @@ export async function connectWhatsApp(onMessage) {
       creds: state.creds,
       keys: makeCacheableSignalKeyStore(state.keys, logger),
     },
-    browser: ['BNI-ReportDetect', 'Chrome', '120.0.0'],
+    browser: ["ReportDetect", "Chrome", "120.0.0"],
     generateHighQualityLinkPreview: false,
     syncFullHistory: false,
   });
 
   // Connection update events
-  sock.ev.on('connection.update', async (update) => {
+  sock.ev.on("connection.update", async (update) => {
     const { connection, lastDisconnect, qr } = update;
 
     if (qr) {
       qrCode = qr;
-      connectionStatus = 'connecting';
-      console.log('📱 QR Code generated. Scan with WhatsApp to connect.');
+      connectionStatus = "connecting";
+      console.log("📱 QR Code generated. Scan with WhatsApp to connect.");
       qrcodeTerminal.generate(qr, { small: true }, (qrImage) => {
         console.log(qrImage);
       });
     }
 
-    if (connection === 'close') {
-      connectionStatus = 'disconnected';
+    if (connection === "close") {
+      connectionStatus = "disconnected";
       qrCode = null;
 
       const error = lastDisconnect?.error;
-      const statusCode = error instanceof Boom ? error.output?.statusCode : null;
+      const statusCode =
+        error instanceof Boom ? error.output?.statusCode : null;
 
       if (statusCode === DisconnectReason.loggedOut) {
-        console.log('🚫 Logged out. Clearing session and restarting...');
+        console.log("🚫 Logged out. Clearing session and restarting...");
         // Clear session data
         if (fs.existsSync(sessionDir)) {
           fs.rmSync(sessionDir, { recursive: true, force: true });
@@ -94,37 +95,39 @@ export async function connectWhatsApp(onMessage) {
         // Reconnect after clearing session
         setTimeout(() => connectWhatsApp(onMessage), 3000);
       } else {
-        console.log(`⚠️ Connection closed (code: ${statusCode}). Reconnecting in 5s...`);
+        console.log(
+          `⚠️ Connection closed (code: ${statusCode}). Reconnecting in 5s...`,
+        );
         setTimeout(() => connectWhatsApp(onMessage), 5000);
       }
     }
 
-    if (connection === 'open') {
-      connectionStatus = 'open';
+    if (connection === "open") {
+      connectionStatus = "open";
       qrCode = null;
-      console.log('✅ WhatsApp connected successfully!');
+      console.log("✅ WhatsApp connected successfully!");
     }
   });
 
   // Save credentials on update
-  sock.ev.on('creds.update', saveCreds);
+  sock.ev.on("creds.update", saveCreds);
 
   // Listen for incoming messages
-  sock.ev.on('messages.upsert', async ({ messages, type }) => {
-    if (type !== 'notify') return;
+  sock.ev.on("messages.upsert", async ({ messages, type }) => {
+    if (type !== "notify") return;
 
     for (const msg of messages) {
       // Skip status updates and own messages
-      if (msg.key.remoteJid === 'status@broadcast') continue;
+      if (msg.key.remoteJid === "status@broadcast") continue;
       if (msg.key.fromMe) continue;
 
       // Only process group messages
-      if (!msg.key.remoteJid?.endsWith('@g.us')) continue;
+      if (!msg.key.remoteJid?.endsWith("@g.us")) continue;
 
       try {
         await onMessage(sock, msg);
       } catch (err) {
-        console.error('❌ Error processing message:', err.message);
+        console.error("❌ Error processing message:", err.message);
       }
     }
   });
@@ -136,7 +139,7 @@ export async function connectWhatsApp(onMessage) {
  * Get all groups the bot is part of
  */
 export async function getAllGroups() {
-  if (!sock || connectionStatus !== 'open') {
+  if (!sock || connectionStatus !== "open") {
     return [];
   }
 
@@ -147,10 +150,10 @@ export async function getAllGroups() {
       name: group.subject,
       participants: group.participants?.length || 0,
       creation: group.creation,
-      desc: group.desc || '',
+      desc: group.desc || "",
     }));
   } catch (err) {
-    console.error('❌ Error fetching groups:', err.message);
+    console.error("❌ Error fetching groups:", err.message);
     return [];
   }
 }
@@ -162,7 +165,7 @@ export async function disconnectWhatsApp() {
   if (sock) {
     await sock.logout();
     sock = null;
-    connectionStatus = 'disconnected';
+    connectionStatus = "disconnected";
     qrCode = null;
   }
 }

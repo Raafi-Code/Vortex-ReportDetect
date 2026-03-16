@@ -1,5 +1,5 @@
 {
-  "name": "bni-whatsapp-reportdetect-backend",
+  "name": "whatsapp-reportdetect-backend",
   "version": "1.0.0",
   "description": "WhatsApp message monitoring & forwarding backend with Baileys",
   "main": "src/index.js",

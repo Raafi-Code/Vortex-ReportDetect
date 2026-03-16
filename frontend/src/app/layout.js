@@ -4,12 +4,12 @@ import Providers from "@/components/providers";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "ATM Report | BNI",
+  title: "Vortex - ReportDetect",
   description: "WhatsApp message monitoring and auto-forwarding dashboard",
   icons: {
-    icon: "/bnitabbar.png",
-    shortcut: "/bnitabbar.png",
-    apple: "/bnitabbar.png",
+    icon: "/vortex.png",
+    shortcut: "/vortex.png",
+    apple: "/vortex.png",
   },
 };
 
