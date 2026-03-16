@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import "dotenv/config";
 
 const config = {
   supabase: {
@@ -7,21 +7,27 @@ const config = {
     anonKey: process.env.SUPABASE_ANON_KEY,
   },
   api: {
-    port: parseInt(process.env.API_PORT || '3001', 10),
-    key: process.env.API_KEY,
-    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+    port: parseInt(process.env.API_PORT || "3001", 10),
+    frontendUrl: process.env.FRONTEND_URL || "http://localhost:3000",
+  },
+  auth: {
+    allowedEmail: (
+      process.env.ALLOWED_LOGIN_EMAIL || "bni.project.ryurex@gmail.com"
+    )
+      .trim()
+      .toLowerCase(),
   },
   whatsapp: {
-    sessionName: process.env.SESSION_NAME || 'bni-wa-session',
+    sessionName: process.env.SESSION_NAME || "bni-wa-session",
   },
   storage: {
-    bucket: 'whatsapp-media',
+    bucket: "whatsapp-media",
     mediaRetentionDays: 30,
   },
 };
 
 // Validate required env vars
-const required = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'API_KEY'];
+const required = ["SUPABASE_URL", "SUPABASE_SERVICE_KEY", "SUPABASE_ANON_KEY"];
 for (const key of required) {
   if (!process.env[key]) {
     console.error(`❌ Missing required environment variable: ${key}`);

@@ -21,6 +21,7 @@ import {
 import Image from "next/image";
 import { getMessages, markAsRead, markAllRead, deleteMessage } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
+import { confirmAction, showError } from "@/lib/alerts";
 import { useLanguage } from "@/contexts/language-context";
 
 export default function InboxPage() {
@@ -148,13 +149,21 @@ export default function InboxPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm(t.deleteConfirm)) return;
+    const confirmed = await confirmAction({
+      title: t.deleteMessage,
+      text: t.deleteConfirm,
+      confirmText: isId ? "Ya, hapus" : "Yes, delete",
+      cancelText: isId ? "Batal" : "Cancel",
+    });
+    if (!confirmed) return;
+
     try {
       await deleteMessage(id);
       setMessages((prev) => prev.filter((m) => m.id !== id));
       if (selectedMsg?.id === id) setSelectedMsg(null);
     } catch (err) {
       console.error("Failed to delete:", err);
+      await showError(err.message, t.deleteMessage);
     }
   };
 

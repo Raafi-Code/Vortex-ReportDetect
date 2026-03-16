@@ -1,5 +1,27 @@
+import { supabase } from "@/lib/supabase";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY || "";
+
+function buildLoginUrlFromCurrentLocation() {
+  if (typeof window === "undefined") return "/login";
+
+  const pathname = window.location.pathname;
+  if (!pathname || pathname === "/login") return "/login";
+
+  return `/login?next=${encodeURIComponent(pathname)}`;
+}
+
+async function handleUnauthorized() {
+  try {
+    await supabase.auth.signOut();
+  } catch {
+    // Ignore sign out errors and continue redirect flow.
+  }
+
+  if (typeof window !== "undefined") {
+    window.location.replace(buildLoginUrlFromCurrentLocation());
+  }
+}
 
 /**
  * Make an authenticated API request to the backend
@@ -7,19 +29,36 @@ const API_KEY = process.env.NEXT_PUBLIC_API_KEY || "";
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`;
 
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+
+  if (sessionError || !session?.access_token) {
+    await handleUnauthorized();
+    throw new Error("Authentication required. Please log in again.");
+  }
+
   const response = await fetch(url, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": API_KEY,
+      Authorization: `Bearer ${session.access_token}`,
       ...options.headers,
     },
   });
 
-  const data = await response.json();
+  const contentType = response.headers.get("content-type") || "";
+  const data = contentType.includes("application/json")
+    ? await response.json()
+    : {};
 
   if (!response.ok) {
-    throw new Error(data.error || "API request failed");
+    if (response.status === 401 || response.status === 403) {
+      await handleUnauthorized();
+    }
+
+    throw new Error(data.error || data.message || "API request failed");
   }
 
   return data;
@@ -96,6 +135,8 @@ export const setConfig = (key, value) =>
     method: "PUT",
     body: JSON.stringify({ value }),
   });
+export const resetOperationalData = () =>
+  apiRequest("/api/config/reset-data", { method: "POST" });
 
 // ========== Forwarding Rules ==========
 export const getForwardingRules = () =>

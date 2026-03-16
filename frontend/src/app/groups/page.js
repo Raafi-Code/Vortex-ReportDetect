@@ -9,6 +9,7 @@ import {
   updateGroup,
   deleteGroup,
 } from "@/lib/api";
+import { confirmAction, showError } from "@/lib/alerts";
 import { useLanguage } from "@/contexts/language-context";
 
 export default function GroupsPage() {
@@ -84,7 +85,7 @@ export default function GroupsPage() {
       setShowAdd(false);
     } catch (err) {
       console.error("Failed to add group:", err);
-      alert(`${t.addFailed}: ${err.message}`);
+      await showError(err.message, t.addFailed);
     }
   };
 
@@ -102,12 +103,20 @@ export default function GroupsPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm(t.deleteConfirm)) return;
+    const confirmed = await confirmAction({
+      title: t.delete,
+      text: t.deleteConfirm,
+      confirmText: isId ? "Ya, hapus" : "Yes, delete",
+      cancelText: isId ? "Batal" : "Cancel",
+    });
+    if (!confirmed) return;
+
     try {
       await deleteGroup(id);
       setMonitoredGroups((prev) => prev.filter((g) => g.id !== id));
     } catch (err) {
       console.error("Failed to delete group:", err);
+      await showError(err.message, t.delete);
     }
   };
 

@@ -8,6 +8,7 @@ import {
   updateKeyword,
   deleteKeyword,
 } from "@/lib/api";
+import { confirmAction, showError } from "@/lib/alerts";
 import { useLanguage } from "@/contexts/language-context";
 
 export default function KeywordsPage() {
@@ -71,7 +72,7 @@ export default function KeywordsPage() {
       setNewKeyword("");
     } catch (err) {
       console.error("Failed to add keyword:", err);
-      alert(`${t.addFailed}: ${err.message}`);
+      await showError(err.message, t.addFailed);
     } finally {
       setAdding(false);
     }
@@ -91,12 +92,20 @@ export default function KeywordsPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm(t.deleteConfirm)) return;
+    const confirmed = await confirmAction({
+      title: t.delete,
+      text: t.deleteConfirm,
+      confirmText: isId ? "Ya, hapus" : "Yes, delete",
+      cancelText: isId ? "Batal" : "Cancel",
+    });
+    if (!confirmed) return;
+
     try {
       await deleteKeyword(id);
       setKeywords((prev) => prev.filter((k) => k.id !== id));
     } catch (err) {
       console.error("Failed to delete keyword:", err);
+      await showError(err.message, t.delete);
     }
   };
 

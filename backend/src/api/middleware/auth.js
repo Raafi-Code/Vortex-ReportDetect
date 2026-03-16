@@ -1,17 +1,44 @@
-import config from '../../config.js';
+import { createClient } from "@supabase/supabase-js";
+import config from "../../config.js";
 
 /**
- * Simple API key authentication middleware
+ * Validate Supabase JWT from Authorization header.
  */
-export function authMiddleware(req, res, next) {
-  const apiKey = req.headers['x-api-key'] || req.query.apiKey;
+const authClient = createClient(config.supabase.url, config.supabase.anonKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  },
+});
 
-  if (!apiKey || apiKey !== config.api.key) {
+export async function authMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+
+  if (!token) {
     return res.status(401).json({
-      error: 'Unauthorized',
-      message: 'Invalid or missing API key. Provide it via x-api-key header.',
+      error: "Unauthorized",
+      message: "Missing bearer token. Provide Authorization: Bearer <token>.",
     });
   }
 
+  const { data, error } = await authClient.auth.getUser(token);
+  if (error || !data?.user) {
+    return res.status(401).json({
+      error: "Unauthorized",
+      message: "Invalid or expired token.",
+    });
+  }
+
+  const allowedEmail = config.auth.allowedEmail;
+  const userEmail = (data.user.email || "").trim().toLowerCase();
+  if (allowedEmail && userEmail !== allowedEmail) {
+    return res.status(403).json({
+      error: "Forbidden",
+      message: "Your account is not allowed to access this API.",
+    });
+  }
+
+  req.user = data.user;
   next();
 }

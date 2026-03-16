@@ -102,16 +102,16 @@ Isi `.env`:
 SUPABASE_URL=https://your-project-id.supabase.co
 SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIs....(service_role key)
 SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs....(anon key)
+ALLOWED_LOGIN_EMAIL=xxx@gmail.com
 
 API_PORT=3001
-API_KEY=buat-api-key-rahasia-yang-panjang-dan-acak
 
 FRONTEND_URL=https://your-frontend.vercel.app
 
 SESSION_NAME=bni-wa-session
 ```
 
-> ⚠️ **Penting**: `API_KEY` harus sama antara backend dan frontend. Gunakan string acak yang panjang.
+> ⚠️ **Penting**: Backend sekarang memvalidasi `Authorization: Bearer <Supabase access token>` dari user login, jadi tidak perlu `NEXT_PUBLIC_API_KEY` lagi di frontend.
 
 ### 2.5 Jalankan dengan PM2
 
@@ -182,7 +182,6 @@ Di Vercel project **Settings** → **Environment Variables**, tambahkan:
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | (anon key dari Supabase) |
 | `NEXT_PUBLIC_ALLOWED_LOGIN_EMAIL` | `bni.project.ryurex@gmail.com` |
 | `NEXT_PUBLIC_API_URL` | `http://your-vps-ip:3001` |
-| `NEXT_PUBLIC_API_KEY` | (API key yang sama dengan backend) |
 
 6. Klik **Deploy**
 
@@ -235,7 +234,7 @@ Kirim pesan di grup yang dimonitor dengan salah satu keyword. Pesan harus:
 | Koneksi terputus | Baileys auto-reconnect. Jika logout, hapus folder `sessions/` dan restart |
 | Pesan tidak terdeteksi | Cek apakah grup sudah di-monitor dan keyword aktif |
 | Media tidak terupload | Cek apakah bucket `whatsapp-media` ada dan public |
-| Frontend error API | Cek `NEXT_PUBLIC_API_URL` dan `NEXT_PUBLIC_API_KEY` |
+| Frontend error API | Cek `NEXT_PUBLIC_API_URL`, session login Supabase, dan `SUPABASE_ANON_KEY` backend |
 | CORS error | Pastikan `FRONTEND_URL` di backend `.env` sesuai URL Vercel |
 
 ---
@@ -244,7 +243,7 @@ Kirim pesan di grup yang dimonitor dengan salah satu keyword. Pesan harus:
 
 1. Gunakan **HTTPS** untuk backend (pasang Nginx reverse proxy + Let's Encrypt)
 2. Jangan expose `SUPABASE_SERVICE_KEY` ke frontend
-3. Gunakan `API_KEY` yang kuat (minimal 32 karakter)
+3. Pastikan backend hanya menerima `Bearer token` Supabase yang valid
 4. Batasi akses ke port 3001 hanya dari IP Vercel jika memungkinkan
 
 ### Contoh Nginx Reverse Proxy

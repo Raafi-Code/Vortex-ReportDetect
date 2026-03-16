@@ -55,7 +55,7 @@ Alur: **GitHub → VPS (Git Clone)**
    ```bash
    npm install
    cp .env.example .env
-   nano .env # Masukkan Config & API_KEY rahasia
+   nano .env # Masukkan Config Supabase + ALLOWED_LOGIN_EMAIL
    ```
 4. **Jalankan dengan PM2**:
    ```bash
@@ -86,11 +86,11 @@ Alur: **GitHub → Vercel (Auto Connect)**
 
 ---
 
-## 🔑 Ringkasan API KEY & Endpoint
+## 🔑 Ringkasan Auth & Endpoint
 
 | Komponen | Kegunaan | Lokasi |
 |---|---|---|
-| **API_KEY** | Keamanan antara Frontend & Backend | `backend/.env` & Vercel Env |
+| **Supabase Access Token (Bearer)** | Autentikasi request Frontend ke Backend | Session login user (otomatis dari Supabase) |
 | **SUPABASE_URL** | Koneksi Database | Keduanya |
 | **NEXT_PUBLIC_API_URL** | Alamat Backend di VPS | Vercel Env (Contoh: `http://IP_VPS:3001`) |
 
@@ -98,5 +98,5 @@ Alur: **GitHub → Vercel (Auto Connect)**
 
 ### Tips Keamanan 🛡️
 - Jangan pernah menghapus `.gitignore`.
-- Jangan pernah membagikan `API_KEY` atau `SUPABASE_SERVICE_KEY` ke orang lain.
+- Jangan pernah membagikan `SUPABASE_SERVICE_KEY` ke orang lain.
 - Jika deploy di VPS, disarankan menggunakan Domain + SSL (Nginx Reverse Proxy) agar koneksi API lebih aman (HTTPS).

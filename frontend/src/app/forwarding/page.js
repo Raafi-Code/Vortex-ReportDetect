@@ -20,6 +20,7 @@ import {
   getConfig,
   setConfig,
 } from "@/lib/api";
+import { confirmAction, showError, showInfo } from "@/lib/alerts";
 import { useLanguage } from "@/contexts/language-context";
 
 export default function ForwardingPage() {
@@ -129,7 +130,7 @@ export default function ForwardingPage() {
       !newRule.target_jid ||
       !newRule.target_name
     ) {
-      alert(t.allFieldsRequired);
+      await showInfo(t.allFieldsRequired, isId ? "Validasi" : "Validation");
       return;
     }
     try {
@@ -144,7 +145,7 @@ export default function ForwardingPage() {
       });
     } catch (err) {
       console.error("Failed to add rule:", err);
-      alert(`${t.addFailed}: ${err.message}`);
+      await showError(err.message, t.addFailed);
     }
   };
 
@@ -162,12 +163,20 @@ export default function ForwardingPage() {
   };
 
   const handleDeleteRule = async (id) => {
-    if (!confirm(t.deleteConfirm)) return;
+    const confirmed = await confirmAction({
+      title: t.delete,
+      text: t.deleteConfirm,
+      confirmText: isId ? "Ya, hapus" : "Yes, delete",
+      cancelText: isId ? "Batal" : "Cancel",
+    });
+    if (!confirmed) return;
+
     try {
       await deleteForwardingRule(id);
       setRules((prev) => prev.filter((r) => r.id !== id));
     } catch (err) {
       console.error("Failed to delete rule:", err);
+      await showError(err.message, t.delete);
     }
   };
 

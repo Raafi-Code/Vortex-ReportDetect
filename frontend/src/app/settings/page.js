@@ -13,9 +13,17 @@ import {
   HardDrive,
   Clock,
   Power,
+  AlertTriangle,
 } from "lucide-react";
 import Image from "next/image";
-import { getStatus, disconnectWA, triggerCleanup, getConfig } from "@/lib/api";
+import {
+  getStatus,
+  disconnectWA,
+  triggerCleanup,
+  getConfig,
+  resetOperationalData,
+} from "@/lib/api";
+import { confirmAction, showError, showSuccess } from "@/lib/alerts";
 import { useLanguage } from "@/contexts/language-context";
 
 export default function SettingsPage() {
@@ -70,12 +78,29 @@ export default function SettingsPage() {
     apiInfo: isId ? "Informasi API" : "API Information",
     backendUrl: isId ? "Backend URL" : "Backend URL",
     supabaseUrl: isId ? "Supabase URL" : "Supabase URL",
+    resetTitle: isId ? "Reset Data Aplikasi" : "Application Data Reset",
+    resetHint: isId
+      ? "Hapus seluruh data operasional: pesan, media, group monitor, keyword, dan forwarding rules."
+      : "Delete all operational data: messages, media, monitored groups, keywords, and forwarding rules.",
+    resetSafeNote: isId
+      ? "Akun/Auth tidak akan dihapus."
+      : "Auth/accounts will not be deleted.",
+    resetNow: isId ? "Reset Data Sekarang" : "Reset Data Now",
+    resetting: isId ? "Mereset..." : "Resetting...",
+    resetConfirm: isId
+      ? "Yakin ingin reset semua data operasional? Tindakan ini tidak bisa dibatalkan."
+      : "Are you sure you want to reset all operational data? This action cannot be undone.",
+    resetDone: isId
+      ? "Reset selesai. Data operasional telah dihapus."
+      : "Reset completed. Operational data has been deleted.",
+    resetFailed: isId ? "Reset gagal" : "Reset failed",
   };
 
   const [qrCode, setQrCode] = useState(null);
   const [config, setConfigState] = useState({});
   const [loading, setLoading] = useState(true);
   const [cleaningUp, setCleaningUp] = useState(false);
+  const [resettingData, setResettingData] = useState(false);
 
   async function fetchData() {
     try {
@@ -101,28 +126,68 @@ export default function SettingsPage() {
   }, []);
 
   const handleDisconnect = async () => {
-    if (!confirm(t.disconnectConfirm)) return;
+    const confirmed = await confirmAction({
+      title: t.disconnect,
+      text: t.disconnectConfirm,
+      confirmText: isId ? "Ya, putuskan" : "Yes, disconnect",
+      cancelText: isId ? "Batal" : "Cancel",
+    });
+    if (!confirmed) return;
+
     try {
       await disconnectWA();
       setStatus("disconnected");
       setQrCode(null);
     } catch (err) {
       console.error("Failed to disconnect:", err);
-      alert(`${t.disconnectFailed}: ${err.message}`);
+      await showError(err.message, t.disconnectFailed);
     }
   };
 
   const handleCleanup = async () => {
-    if (!confirm(t.cleanupConfirm)) return;
+    const confirmed = await confirmAction({
+      title: t.cleanupRun,
+      text: t.cleanupConfirm,
+      confirmText: isId ? "Ya, jalankan" : "Yes, run",
+      cancelText: isId ? "Batal" : "Cancel",
+    });
+    if (!confirmed) return;
+
     setCleaningUp(true);
     try {
       await triggerCleanup();
-      alert(t.cleanupDone);
+      await showSuccess(t.cleanupDone, t.cleanupRun);
     } catch (err) {
       console.error("Cleanup failed:", err);
-      alert(`${t.cleanupFailed}: ${err.message}`);
+      await showError(err.message, t.cleanupFailed);
     } finally {
       setCleaningUp(false);
+    }
+  };
+
+  const handleResetOperationalData = async () => {
+    const confirmed = await confirmAction({
+      title: t.resetNow,
+      text: t.resetConfirm,
+      confirmText: isId ? "Ya, reset" : "Yes, reset",
+      cancelText: isId ? "Batal" : "Cancel",
+    });
+    if (!confirmed) return;
+
+    setResettingData(true);
+    try {
+      const res = await resetOperationalData();
+      const removedMediaCount = res?.data?.removedMediaCount ?? 0;
+      await showSuccess(
+        `${t.resetDone} (Media removed: ${removedMediaCount})`,
+        t.resetNow,
+      );
+      await fetchData();
+    } catch (err) {
+      console.error("Reset failed:", err);
+      await showError(err.message, t.resetFailed);
+    } finally {
+      setResettingData(false);
     }
   };
 
@@ -278,6 +343,32 @@ export default function SettingsPage() {
           ) : (
             <>
               <Trash2 size={14} /> {t.cleanupRun}
+            </>
+          )}
+        </button>
+      </section>
+
+      <section className="rounded-2xl border border-[var(--accent-red)] bg-[var(--accent-red-dim)] p-4 md:p-5">
+        <h3 className="mb-3 flex items-center gap-2 text-base font-bold text-[var(--accent-red)]">
+          <AlertTriangle size={18} /> {t.resetTitle}
+        </h3>
+        <p className="text-sm text-[var(--text-secondary)]">{t.resetHint}</p>
+        <p className="mt-1 text-sm font-semibold text-[var(--accent-red)]">
+          {t.resetSafeNote}
+        </p>
+
+        <button
+          className="btn btn-danger btn-sm mt-4 justify-center"
+          onClick={handleResetOperationalData}
+          disabled={resettingData}
+        >
+          {resettingData ? (
+            <>
+              <Loader2 size={14} className="animate-spin" /> {t.resetting}
+            </>
+          ) : (
+            <>
+              <Trash2 size={14} /> {t.resetNow}
             </>
           )}
         </button>
