@@ -5,50 +5,53 @@
  * @param {object} messageInfo - Message info (text, media buffer, sender, group)
  */
 export async function forwardMessage(sock, targetJid, messageInfo) {
-  const { text, senderName, groupName, matchedKeyword, mediaBuffer, mediaType, mediaMimetype } = messageInfo;
+  const { text, senderName, mediaBuffer, mediaType, mediaMimetype } =
+    messageInfo;
 
-  // Build formatted header
+  // Build forwarding text in requested report format.
+  const reportTime = new Date().toLocaleString("id-ID", {
+    timeZone: "Asia/Makassar",
+  });
+  const safeText = (text || "").trim() || "(tanpa isi pesan)";
+
   const header = [
-    `📩 *Pesan Terdeteksi*`,
+    `BNI-ATM Report`,
     `━━━━━━━━━━━━━━━━━`,
-    `👤 *Pengirim:* ${senderName}`,
-    `👥 *Grup:* ${groupName}`,
-    `🔑 *Keyword:* ${matchedKeyword}`,
-    `🕐 *Waktu:* ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`,
-    `━━━━━━━━━━━━━━━━━`,
-    ``,
-  ].join('\n');
+    `${senderName || "Unknown"}`,
+    `${reportTime} WITA`,
+    `${safeText}`,
+  ].join("\n");
 
-  const fullText = `${header}${text}`;
+  const fullText = header;
 
   try {
-    if (mediaBuffer && mediaType === 'image') {
+    if (mediaBuffer && mediaType === "image") {
       // Forward with image + caption
       await sock.sendMessage(targetJid, {
         image: mediaBuffer,
         caption: fullText,
-        mimetype: mediaMimetype || 'image/jpeg',
+        mimetype: mediaMimetype || "image/jpeg",
       });
-    } else if (mediaBuffer && mediaType === 'video') {
+    } else if (mediaBuffer && mediaType === "video") {
       // Forward with video + caption
       await sock.sendMessage(targetJid, {
         video: mediaBuffer,
         caption: fullText,
-        mimetype: mediaMimetype || 'video/mp4',
+        mimetype: mediaMimetype || "video/mp4",
       });
-    } else if (mediaBuffer && mediaType === 'document') {
+    } else if (mediaBuffer && mediaType === "document") {
       // Forward document, then text separately
       await sock.sendMessage(targetJid, {
         document: mediaBuffer,
-        mimetype: mediaMimetype || 'application/octet-stream',
-        fileName: 'document',
+        mimetype: mediaMimetype || "application/octet-stream",
+        fileName: "document",
       });
       await sock.sendMessage(targetJid, { text: fullText });
-    } else if (mediaBuffer && mediaType === 'audio') {
+    } else if (mediaBuffer && mediaType === "audio") {
       // Forward audio, then text separately
       await sock.sendMessage(targetJid, {
         audio: mediaBuffer,
-        mimetype: mediaMimetype || 'audio/ogg',
+        mimetype: mediaMimetype || "audio/ogg",
       });
       await sock.sendMessage(targetJid, { text: fullText });
     } else {
