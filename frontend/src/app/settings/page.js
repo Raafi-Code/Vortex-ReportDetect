@@ -113,17 +113,34 @@ export default function SettingsPage() {
       setConfigState(configRes.data || {});
     } catch (err) {
       console.error("Failed to fetch settings:", err);
+      setStatus("unknown");
+      setQrCode(null);
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    fetchData();
-    // Poll for status updates (especially for QR code)
-    const interval = setInterval(fetchData, 5000);
-    return () => clearInterval(interval);
-  }, []);
+    let timer = null;
+
+    const refresh = async () => {
+      await fetchData();
+
+      // Use adaptive polling to reduce pressure:
+      // - faster while waiting for QR/connect
+      // - slower when already connected
+      const nextInterval =
+        status === "open" ? 15000 : status === "connecting" ? 5000 : 10000;
+
+      timer = setTimeout(refresh, nextInterval);
+    };
+
+    refresh();
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [status]);
 
   const handleDisconnect = async () => {
     const confirmed = await confirmAction({

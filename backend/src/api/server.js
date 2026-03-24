@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
 import config from "../config.js";
 import { authMiddleware } from "./middleware/auth.js";
 import groupsRouter from "./routes/groups.js";
@@ -44,31 +43,6 @@ export function createServer() {
     }),
   );
 
-  const globalLimiter = rateLimit({
-    windowMs: config.security.rateLimit.windowMs,
-    max: config.security.rateLimit.maxRequests,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: {
-      error: "Too Many Requests",
-      message: "Too many requests from this IP, please try again later.",
-    },
-  });
-
-  const sensitiveLimiter = rateLimit({
-    windowMs: config.security.rateLimit.windowMs,
-    max: config.security.rateLimit.authMaxRequests,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: {
-      error: "Too Many Requests",
-      message:
-        "Too many sensitive operation requests from this IP, please try again later.",
-    },
-  });
-
-  app.use("/api", globalLimiter);
-
   // Health check (no auth required)
   app.get("/health", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
@@ -78,8 +52,8 @@ export function createServer() {
   app.use("/api/groups", authMiddleware, groupsRouter);
   app.use("/api/keywords", authMiddleware, keywordsRouter);
   app.use("/api/messages", authMiddleware, messagesRouter);
-  app.use("/api/config", authMiddleware, sensitiveLimiter, configRouter);
-  app.use("/api/status", authMiddleware, sensitiveLimiter, statusRouter);
+  app.use("/api/config", authMiddleware, configRouter);
+  app.use("/api/status", authMiddleware, statusRouter);
 
   // 404 handler
   app.use((req, res) => {

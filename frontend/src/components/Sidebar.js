@@ -47,7 +47,8 @@ export default function Sidebar({
         const res = await getStatus();
         setStatus(res.data?.status || "disconnected");
       } catch {
-        setStatus("disconnected");
+        // Keep previous known status on transient request failures
+        // to avoid flickering to "disconnected" in the UI.
       }
     }
 

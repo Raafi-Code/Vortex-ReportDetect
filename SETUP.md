@@ -114,9 +114,7 @@ STORAGE_BUCKET=whatsapp-media
 MEDIA_RETENTION_DAYS=30
 MEDIA_SIGNED_URL_EXPIRES_IN=900
 
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=300
-RATE_LIMIT_AUTH_MAX_REQUESTS=60
+
 ```
 
 > 💡 Untuk deployment di belakang reverse proxy (mis. Zeabur/Nginx), gunakan `TRUST_PROXY=1` agar backend membaca IP client dan protocol (http/https) dengan benar dari proxy pertama.
