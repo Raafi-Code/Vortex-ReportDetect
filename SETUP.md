@@ -105,10 +105,18 @@ SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs....(anon key)
 ALLOWED_LOGIN_EMAIL=xxx@gmail.com
 
 API_PORT=3001
-
 FRONTEND_URL=https://your-frontend.vercel.app
+TRUST_PROXY=true
 
 SESSION_NAME=wa-session
+
+STORAGE_BUCKET=whatsapp-media
+MEDIA_RETENTION_DAYS=30
+MEDIA_SIGNED_URL_EXPIRES_IN=900
+
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=300
+RATE_LIMIT_AUTH_MAX_REQUESTS=60
 ```
 
 > ⚠️ **Penting**: Backend sekarang memvalidasi `Authorization: Bearer <Supabase access token>` dari user login, jadi tidak perlu `NEXT_PUBLIC_API_KEY` lagi di frontend.

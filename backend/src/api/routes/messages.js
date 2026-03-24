@@ -1,7 +1,32 @@
 import { Router } from "express";
 import supabase from "../../supabase.js";
+import config from "../../config.js";
 
 const router = Router();
+
+async function attachSignedUrl(message) {
+  if (!message?.media_storage_path) return message;
+
+  const { data, error } = await supabase.storage
+    .from(config.storage.bucket)
+    .createSignedUrl(
+      message.media_storage_path,
+      config.storage.signedUrlExpiresIn,
+    );
+
+  if (error) {
+    return message;
+  }
+
+  return {
+    ...message,
+    media_url: data?.signedUrl || null,
+  };
+}
+
+async function attachSignedUrls(messages = []) {
+  return Promise.all(messages.map((msg) => attachSignedUrl(msg)));
+}
 
 /**
  * GET /api/messages
@@ -36,9 +61,11 @@ router.get("/", async (req, res) => {
 
     if (error) throw error;
 
+    const signedData = await attachSignedUrls(data || []);
+
     res.json({
       success: true,
-      data,
+      data: signedData,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
@@ -78,7 +105,7 @@ router.get("/stats", async (req, res) => {
     const { count: mediaMessages } = await supabase
       .from("messages")
       .select("*", { count: "exact", head: true })
-      .not("media_url", "is", null);
+      .not("media_storage_path", "is", null);
 
     // Active groups count
     const { count: activeGroups } = await supabase
@@ -337,10 +364,12 @@ router.get("/:id", async (req, res) => {
 
     if (error) throw error;
 
+    const signedMessage = await attachSignedUrl(data);
+
     // Mark as read
     await supabase.from("messages").update({ is_read: true }).eq("id", id);
 
-    res.json({ success: true, data: { ...data, is_read: true } });
+    res.json({ success: true, data: { ...signedMessage, is_read: true } });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -404,7 +433,7 @@ router.delete("/:id", async (req, res) => {
     // Delete media from storage if exists
     if (msg?.media_storage_path) {
       await supabase.storage
-        .from("whatsapp-media")
+        .from(config.storage.bucket)
         .remove([msg.media_storage_path]);
     }
 

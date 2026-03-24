@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import config from "../config.js";
 import { authMiddleware } from "./middleware/auth.js";
 import groupsRouter from "./routes/groups.js";
@@ -14,7 +16,15 @@ import statusRouter from "./routes/status.js";
 export function createServer() {
   const app = express();
 
-  // Middleware
+  // Security middleware
+  app.set("trust proxy", config.api.trustProxy);
+  app.disable("x-powered-by");
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+    }),
+  );
+
   app.use(
     cors({
       origin: [
@@ -25,7 +35,39 @@ export function createServer() {
       credentials: true,
     }),
   );
-  app.use(express.json());
+
+  app.use(
+    express.json({
+      limit: "100kb",
+      strict: true,
+      type: "application/json",
+    }),
+  );
+
+  const globalLimiter = rateLimit({
+    windowMs: config.security.rateLimit.windowMs,
+    max: config.security.rateLimit.maxRequests,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+      error: "Too Many Requests",
+      message: "Too many requests from this IP, please try again later.",
+    },
+  });
+
+  const sensitiveLimiter = rateLimit({
+    windowMs: config.security.rateLimit.windowMs,
+    max: config.security.rateLimit.authMaxRequests,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+      error: "Too Many Requests",
+      message:
+        "Too many sensitive operation requests from this IP, please try again later.",
+    },
+  });
+
+  app.use("/api", globalLimiter);
 
   // Health check (no auth required)
   app.get("/health", (req, res) => {
@@ -36,8 +78,8 @@ export function createServer() {
   app.use("/api/groups", authMiddleware, groupsRouter);
   app.use("/api/keywords", authMiddleware, keywordsRouter);
   app.use("/api/messages", authMiddleware, messagesRouter);
-  app.use("/api/config", authMiddleware, configRouter);
-  app.use("/api/status", authMiddleware, statusRouter);
+  app.use("/api/config", authMiddleware, sensitiveLimiter, configRouter);
+  app.use("/api/status", authMiddleware, sensitiveLimiter, statusRouter);
 
   // 404 handler
   app.use((req, res) => {

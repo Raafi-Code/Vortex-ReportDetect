@@ -1,13 +1,13 @@
-import supabase from './supabase.js';
-import { handleMedia } from './mediaHandler.js';
-import { forwardMessage } from './forwarder.js';
+import supabase from "./supabase.js";
+import { handleMedia } from "./mediaHandler.js";
+import { forwardMessage } from "./forwarder.js";
 
 /**
  * Extract text content from a WhatsApp message
  */
 function extractMessageText(msg) {
   const m = msg.message;
-  if (!m) return '';
+  if (!m) return "";
 
   return (
     m.conversation ||
@@ -15,7 +15,7 @@ function extractMessageText(msg) {
     m.imageMessage?.caption ||
     m.videoMessage?.caption ||
     m.documentMessage?.caption ||
-    ''
+    ""
   );
 }
 
@@ -24,7 +24,7 @@ function extractMessageText(msg) {
  */
 function extractSenderInfo(msg) {
   const senderJid = msg.key.participant || msg.key.remoteJid;
-  const pushName = msg.pushName || 'Unknown';
+  const pushName = msg.pushName || "Unknown";
   return { senderJid, senderName: pushName };
 }
 
@@ -33,10 +33,10 @@ function extractSenderInfo(msg) {
  */
 async function isGroupMonitored(groupJid) {
   const { data, error } = await supabase
-    .from('monitored_groups')
-    .select('id')
-    .eq('group_jid', groupJid)
-    .eq('is_active', true)
+    .from("monitored_groups")
+    .select("id")
+    .eq("group_jid", groupJid)
+    .eq("is_active", true)
     .single();
 
   return !error && !!data;
@@ -47,12 +47,12 @@ async function isGroupMonitored(groupJid) {
  */
 async function getActiveKeywords() {
   const { data, error } = await supabase
-    .from('keywords')
-    .select('keyword')
-    .eq('is_active', true);
+    .from("keywords")
+    .select("keyword")
+    .eq("is_active", true);
 
   if (error) {
-    console.error('❌ Error fetching keywords:', error.message);
+    console.error("❌ Error fetching keywords:", error.message);
     return [];
   }
 
@@ -80,13 +80,13 @@ function matchKeyword(text, keywords) {
  */
 async function isAutoForwardEnabled() {
   const { data, error } = await supabase
-    .from('app_config')
-    .select('value')
-    .eq('key', 'auto_forward_enabled')
+    .from("app_config")
+    .select("value")
+    .eq("key", "auto_forward_enabled")
     .single();
 
   if (error || !data) return true; // Default to enabled
-  return data.value === 'true';
+  return data.value === "true";
 }
 
 /**
@@ -94,13 +94,13 @@ async function isAutoForwardEnabled() {
  */
 async function getForwardingRules(sourceGroupJid) {
   const { data, error } = await supabase
-    .from('forwarding_rules')
-    .select('*')
-    .eq('source_group_jid', sourceGroupJid)
-    .eq('is_active', true);
+    .from("forwarding_rules")
+    .select("*")
+    .eq("source_group_jid", sourceGroupJid)
+    .eq("is_active", true);
 
   if (error) {
-    console.error('❌ Error fetching forwarding rules:', error.message);
+    console.error("❌ Error fetching forwarding rules:", error.message);
     return [];
   }
 
@@ -112,13 +112,13 @@ async function getForwardingRules(sourceGroupJid) {
  */
 async function saveMessage(messageData) {
   const { data, error } = await supabase
-    .from('messages')
+    .from("messages")
     .insert(messageData)
     .select()
     .single();
 
   if (error) {
-    console.error('❌ Error saving message:', error.message);
+    console.error("❌ Error saving message:", error.message);
     return null;
   }
 
@@ -130,9 +130,9 @@ async function saveMessage(messageData) {
  */
 async function getGroupName(groupJid) {
   const { data } = await supabase
-    .from('monitored_groups')
-    .select('group_name')
-    .eq('group_jid', groupJid)
+    .from("monitored_groups")
+    .select("group_name")
+    .eq("group_jid", groupJid)
     .single();
 
   return data?.group_name || groupJid;
@@ -158,7 +158,9 @@ export async function handleIncomingMessage(sock, msg) {
 
   if (!matchedKeyword) return; // No keyword match, skip
 
-  console.log(`🔍 Keyword matched: "${matchedKeyword}" from ${senderName} in ${groupJid}`);
+  console.log(
+    `🔍 Keyword matched: "${matchedKeyword}" from ${senderName} in ${groupJid}`,
+  );
 
   // 4. Handle media (download & upload to Supabase Storage)
   const media = await handleMedia(sock, msg);
@@ -173,7 +175,7 @@ export async function handleIncomingMessage(sock, msg) {
     sender_jid: senderJid,
     sender_name: senderName,
     message_text: text,
-    media_url: media?.url || null,
+    media_url: null,
     media_type: media?.type || null,
     media_storage_path: media?.storagePath || null,
     is_forwarded: false,
@@ -190,14 +192,16 @@ export async function handleIncomingMessage(sock, msg) {
   // 7. Auto-forward if enabled
   const autoForward = await isAutoForwardEnabled();
   if (!autoForward) {
-    console.log('⏸️ Auto-forward is disabled. Message saved but not forwarded.');
+    console.log(
+      "⏸️ Auto-forward is disabled. Message saved but not forwarded.",
+    );
     return;
   }
 
   // 8. Get forwarding rules and forward
   const rules = await getForwardingRules(groupJid);
   if (rules.length === 0) {
-    console.log('ℹ️ No forwarding rules for this group.');
+    console.log("ℹ️ No forwarding rules for this group.");
     return;
   }
 
@@ -221,9 +225,9 @@ export async function handleIncomingMessage(sock, msg) {
 
   // 9. Mark as forwarded in database
   await supabase
-    .from('messages')
+    .from("messages")
     .update({ is_forwarded: true })
-    .eq('id', savedMessage.id);
+    .eq("id", savedMessage.id);
 
   console.log(`✅ Message processed & forwarded successfully.`);
 }

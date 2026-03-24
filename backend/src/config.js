@@ -9,6 +9,7 @@ const config = {
   api: {
     port: parseInt(process.env.API_PORT || "3001", 10),
     frontendUrl: process.env.FRONTEND_URL || "http://localhost:3000",
+    trustProxy: process.env.TRUST_PROXY === "true",
   },
   auth: {
     allowedEmail: (process.env.ALLOWED_LOGIN_EMAIL || "vortex.admin@gmail.com")
@@ -19,8 +20,22 @@ const config = {
     sessionName: process.env.SESSION_NAME || "wa-session",
   },
   storage: {
-    bucket: "whatsapp-media",
-    mediaRetentionDays: 30,
+    bucket: process.env.STORAGE_BUCKET || "whatsapp-media",
+    mediaRetentionDays: parseInt(process.env.MEDIA_RETENTION_DAYS || "30", 10),
+    signedUrlExpiresIn: parseInt(
+      process.env.MEDIA_SIGNED_URL_EXPIRES_IN || "900",
+      10,
+    ),
+  },
+  security: {
+    rateLimit: {
+      windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "900000", 10),
+      maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || "300", 10),
+      authMaxRequests: parseInt(
+        process.env.RATE_LIMIT_AUTH_MAX_REQUESTS || "60",
+        10,
+      ),
+    },
   },
 };
 

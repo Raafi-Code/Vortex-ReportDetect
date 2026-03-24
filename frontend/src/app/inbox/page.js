@@ -19,7 +19,13 @@ import {
   Inbox as InboxIcon,
 } from "lucide-react";
 import Image from "next/image";
-import { getMessages, markAsRead, markAllRead, deleteMessage } from "@/lib/api";
+import {
+  getMessages,
+  getMessage,
+  markAsRead,
+  markAllRead,
+  deleteMessage,
+} from "@/lib/api";
 import { supabase } from "@/lib/supabase";
 import { confirmAction, showError } from "@/lib/alerts";
 import { useLanguage } from "@/contexts/language-context";
@@ -123,15 +129,40 @@ export default function InboxPage() {
 
   const handleSelectMessage = async (msg) => {
     setSelectedMsg(msg);
-    if (!msg.is_read) {
-      try {
+
+    try {
+      const detailRes = await getMessage(msg.id);
+      const detailed = detailRes?.data || msg;
+      setSelectedMsg(detailed);
+
+      if (!msg.is_read) {
         await markAsRead(msg.id);
         setMessages((prev) =>
           prev.map((m) => (m.id === msg.id ? { ...m, is_read: true } : m)),
         );
-        setSelectedMsg((prev) => ({ ...prev, is_read: true }));
-      } catch (err) {
-        console.error("Failed to mark as read:", err);
+        setSelectedMsg((prev) =>
+          prev ? { ...prev, is_read: true } : { ...detailed, is_read: true },
+        );
+      } else {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === msg.id ? { ...m, ...detailed } : m)),
+        );
+      }
+    } catch (err) {
+      console.error("Failed to fetch/select message detail:", err);
+
+      if (!msg.is_read) {
+        try {
+          await markAsRead(msg.id);
+          setMessages((prev) =>
+            prev.map((m) => (m.id === msg.id ? { ...m, is_read: true } : m)),
+          );
+          setSelectedMsg((prev) =>
+            prev ? { ...prev, is_read: true } : { ...msg, is_read: true },
+          );
+        } catch (markErr) {
+          console.error("Failed to mark as read:", markErr);
+        }
       }
     }
   };
@@ -304,7 +335,7 @@ export default function InboxPage() {
                           {formatTime(msg.created_at)}
                         </span>
                         <div className="flex items-center gap-1">
-                          {msg.media_url && (
+                          {msg.media_storage_path && (
                             <span className="tag tag-blue text-[10px]">
                               <ImageIcon size={10} />
                             </span>
@@ -405,31 +436,39 @@ export default function InboxPage() {
                   {selectedMsg.message_text || t.noText}
                 </p>
 
-                {selectedMsg.media_url && (
-                  <div className="overflow-hidden rounded-xl border border-[var(--border)] max-w-xs">
-                    {selectedMsg.media_type === "image" ? (
-                      <Image
-                        src={selectedMsg.media_url}
-                        alt="attachment"
-                        width={400}
-                        height={300}
-                        className="h-auto w-full"
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="p-5 text-center">
-                        <a
-                          href={selectedMsg.media_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="btn btn-primary"
-                        >
-                          Download {selectedMsg.media_type}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                )}
+                {selectedMsg.media_storage_path ? (
+                  selectedMsg.media_url ? (
+                    <div className="overflow-hidden rounded-xl border border-[var(--border)] max-w-xs">
+                      {selectedMsg.media_type === "image" ? (
+                        <Image
+                          src={selectedMsg.media_url}
+                          alt="attachment"
+                          width={400}
+                          height={300}
+                          className="h-auto w-full"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="p-5 text-center">
+                          <a
+                            href={selectedMsg.media_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-primary"
+                          >
+                            Download {selectedMsg.media_type}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-[var(--border)] p-4 text-sm text-[var(--text-muted)]">
+                      {isId
+                        ? "Media tersedia, tetapi tautan akses sudah kedaluwarsa. Buka ulang pesan ini untuk memuat ulang."
+                        : "Media exists, but its access link has expired. Re-open this message to refresh it."}
+                    </div>
+                  )
+                ) : null}
 
                 <button
                   className="btn btn-danger btn-sm"

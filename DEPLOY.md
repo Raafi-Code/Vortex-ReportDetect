@@ -92,11 +92,31 @@ Alur: **GitHub → Vercel (Auto Connect)**
 |---|---|---|
 | **Supabase Access Token (Bearer)** | Autentikasi request Frontend ke Backend | Session login user (otomatis dari Supabase) |
 | **SUPABASE_URL** | Koneksi Database | Keduanya |
-| **NEXT_PUBLIC_API_URL** | Alamat Backend di VPS | Vercel Env (Contoh: `http://IP_VPS:3001`) |
+| **NEXT_PUBLIC_API_URL** | Alamat Backend di VPS (wajib HTTPS) | Vercel Env (Contoh: `https://api.domainkamu.com`) |
 
 ---
+
+## 🔒 Update Keamanan Media (Private Storage)
+
+Project ini menggunakan pendekatan media privat:
+
+- Bucket `whatsapp-media` harus diset **private** (bukan public).
+- Akses media dilakukan via **signed URL** dengan masa berlaku pendek.
+- Backend menyimpan `media_storage_path` dan menghasilkan signed URL saat diperlukan.
+- Hindari penggunaan public URL permanen untuk file media sensitif.
+
+### Checklist Produksi (Wajib)
+
+1. Terapkan SQL RLS terbaru untuk mode single-admin.
+2. Terapkan policy storage terbaru yang membatasi akses ke user admin terautentikasi.
+3. Verifikasi bahwa `NEXT_PUBLIC_API_URL` memakai HTTPS.
+4. Restart backend setelah update konfigurasi keamanan.
+5. Rotasi key sensitif jika sebelumnya pernah memakai konfigurasi storage public.
+
 
 ### Tips Keamanan 🛡️
 - Jangan pernah menghapus `.gitignore`.
 - Jangan pernah membagikan `SUPABASE_SERVICE_KEY` ke orang lain.
-- Jika deploy di VPS, disarankan menggunakan Domain + SSL (Nginx Reverse Proxy) agar koneksi API lebih aman (HTTPS).
+- Jika deploy di VPS, wajib menggunakan Domain + SSL (Nginx Reverse Proxy) agar koneksi API selalu HTTPS.
+- Jangan gunakan URL API berbasis IP + HTTP di environment production.
+- Pastikan endpoint backend hanya diakses dari origin frontend yang valid (CORS terkontrol).
