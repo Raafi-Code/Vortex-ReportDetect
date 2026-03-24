@@ -106,7 +106,7 @@ ALLOWED_LOGIN_EMAIL=xxx@gmail.com
 
 API_PORT=3001
 FRONTEND_URL=https://your-frontend.vercel.app
-TRUST_PROXY=true
+TRUST_PROXY=1
 
 SESSION_NAME=wa-session
 
@@ -118,6 +118,8 @@ RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX_REQUESTS=300
 RATE_LIMIT_AUTH_MAX_REQUESTS=60
 ```
+
+> 💡 Untuk deployment di belakang reverse proxy (mis. Zeabur/Nginx), gunakan `TRUST_PROXY=1` agar backend membaca IP client dan protocol (http/https) dengan benar dari proxy pertama.
 
 > ⚠️ **Penting**: Backend sekarang memvalidasi `Authorization: Bearer <Supabase access token>` dari user login, jadi tidak perlu `NEXT_PUBLIC_API_KEY` lagi di frontend.
 
