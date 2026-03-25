@@ -25,6 +25,7 @@ import {
   markAsRead,
   markAllRead,
   deleteMessage,
+  updateMessageStatus,
 } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
 import { confirmAction, showError } from "@/lib/alerts";
@@ -65,6 +66,13 @@ export default function InboxPage() {
     selectHint: isId
       ? "Klik pesan di sebelah kiri untuk melihat detail"
       : "Click a message on the left to view details",
+    statusLabel: isId ? "Status Laporan" : "Report Status",
+    statusOptions: {
+      diterima: isId ? "Laporan Diterima" : "Report Received",
+      diproses: isId ? "Dalam Pengerjaan" : "In Progress",
+      selesai: isId ? "Laporan Selesai" : "Resolved",
+    },
+    statusUpdating: isId ? "Memperbarui..." : "Updating...",
     tabUnread: isId ? "Belum Dibaca" : "Unread",
     tabRead: isId ? "Sudah Dibaca" : "Read",
     tabAll: isId ? "Semua" : "All",
@@ -79,6 +87,7 @@ export default function InboxPage() {
   const [pagination, setPagination] = useState({});
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("unread"); // 'unread' | 'read' | 'all'
+  const [imageError, setImageError] = useState(false);
 
   const fetchMessages = useCallback(async () => {
     try {
@@ -129,6 +138,7 @@ export default function InboxPage() {
 
   const handleSelectMessage = async (msg) => {
     setSelectedMsg(msg);
+    setImageError(false);
 
     try {
       const detailRes = await getMessage(msg.id);
@@ -195,6 +205,20 @@ export default function InboxPage() {
     } catch (err) {
       console.error("Failed to delete:", err);
       await showError(err.message, t.deleteMessage);
+    }
+  };
+
+  const handleUpdateStatus = async (status) => {
+    if (!selectedMsg) return;
+    try {
+      await updateMessageStatus(selectedMsg.id, status);
+      setSelectedMsg((prev) => ({ ...prev, status }));
+      setMessages((prev) =>
+        prev.map((m) => (m.id === selectedMsg.id ? { ...m, status } : m)),
+      );
+    } catch (err) {
+      console.error("Failed to update status:", err);
+      await showError(err.message, "Error updating status");
     }
   };
 
@@ -331,9 +355,23 @@ export default function InboxPage() {
                         {msg.message_text || t.mediaNoCaption}
                       </p>
                       <div className="mt-2 flex items-center justify-between gap-2">
-                        <span className="text-[11px] text-[var(--text-muted)]">
-                          {formatTime(msg.created_at)}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] text-[var(--text-muted)]">
+                            {formatTime(msg.created_at)}
+                          </span>
+                          {msg.status === "diproses" && (
+                            <span
+                              className="h-2 w-2 rounded-full bg-blue-500"
+                              title={t.statusOptions.diproses}
+                            />
+                          )}
+                          {msg.status === "selesai" && (
+                            <span
+                              className="h-2 w-2 rounded-full bg-green-500"
+                              title={t.statusOptions.selesai}
+                            />
+                          )}
+                        </div>
                         <div className="flex items-center gap-1">
                           {msg.media_storage_path && (
                             <span className="tag tag-blue text-[10px]">
@@ -416,19 +454,42 @@ export default function InboxPage() {
                       )}
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedMsg.is_forwarded ? (
-                      <span className="tag tag-emerald">
-                        <Forward size={12} /> {t.forwarded}
-                      </span>
-                    ) : (
-                      <span className="tag tag-orange">{t.notForwarded}</span>
-                    )}
-                    {selectedMsg.media_type && (
-                      <span className="tag tag-blue">
-                        <ImageIcon size={12} /> {selectedMsg.media_type}
-                      </span>
-                    )}
+                  <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+                    <div className="flex flex-wrap gap-2">
+                      {selectedMsg.is_forwarded ? (
+                        <span className="tag tag-emerald">
+                          <Forward size={12} /> {t.forwarded}
+                        </span>
+                      ) : (
+                        <span className="tag tag-orange">{t.notForwarded}</span>
+                      )}
+                      {selectedMsg.media_type && (
+                        <span className="tag tag-blue">
+                          <ImageIcon size={12} /> {selectedMsg.media_type}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs font-semibold text-[var(--text-muted)]">
+                        {t.statusLabel}:
+                      </label>
+                      <select
+                        className="rounded-lg border border-[var(--border)] bg-[var(--bg-tertiary)] px-2 py-1 text-xs font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+                        value={selectedMsg.status || "diterima"}
+                        onChange={(e) => handleUpdateStatus(e.target.value)}
+                      >
+                        <option value="diterima">
+                          {t.statusOptions.diterima}
+                        </option>
+                        <option value="diproses">
+                          {t.statusOptions.diproses}
+                        </option>
+                        <option value="selesai">
+                          {t.statusOptions.selesai}
+                        </option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 
@@ -440,14 +501,29 @@ export default function InboxPage() {
                   selectedMsg.media_url ? (
                     <div className="overflow-hidden rounded-xl border border-[var(--border)] max-w-xs">
                       {selectedMsg.media_type === "image" ? (
-                        <Image
-                          src={selectedMsg.media_url}
-                          alt="attachment"
-                          width={400}
-                          height={300}
-                          className="h-auto w-full"
-                          unoptimized
-                        />
+                        imageError ? (
+                          <div className="flex flex-col items-center justify-center p-8 bg-[var(--bg-tertiary)] border border-dashed border-[var(--border)] rounded-xl text-center">
+                            <ImageIcon
+                              size={24}
+                              className="text-[var(--text-muted)] mb-2"
+                            />
+                            <p className="text-sm font-medium text-[var(--text-secondary)]">
+                              {isId
+                                ? "File sudah tidak tersedia"
+                                : "File is no longer available"}
+                            </p>
+                          </div>
+                        ) : (
+                          <Image
+                            src={selectedMsg.media_url}
+                            alt="attachment"
+                            width={400}
+                            height={300}
+                            className="h-auto w-full max-h-[300px] object-contain bg-[var(--bg-tertiary)]"
+                            unoptimized
+                            onError={() => setImageError(true)}
+                          />
+                        )
                       ) : (
                         <div className="p-5 text-center">
                           <a

@@ -41,6 +41,8 @@ router.get("/", async (req, res) => {
       is_read,
       search,
       keyword,
+      start_date,
+      end_date,
     } = req.query;
 
     const offset = (parseInt(page) - 1) * parseInt(limit);
@@ -56,6 +58,8 @@ router.get("/", async (req, res) => {
     if (is_read !== undefined) query = query.eq("is_read", is_read === "true");
     if (keyword) query = query.eq("matched_keyword", keyword);
     if (search) query = query.ilike("message_text", `%${search}%`);
+    if (start_date) query = query.gte("created_at", `${start_date}T00:00:00`);
+    if (end_date) query = query.lte("created_at", `${end_date}T23:59:59`);
 
     const { data, error, count } = await query;
 
@@ -370,6 +374,33 @@ router.get("/:id", async (req, res) => {
     await supabase.from("messages").update({ is_read: true }).eq("id", id);
 
     res.json({ success: true, data: { ...signedMessage, is_read: true } });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * PATCH /api/messages/:id/status
+ * Update message status
+ */
+router.patch("/:id/status", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!["diterima", "diproses", "selesai"].includes(status)) {
+      return res.status(400).json({ success: false, error: "Invalid status" });
+    }
+
+    const { data, error } = await supabase
+      .from("messages")
+      .update({ status })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json({ success: true, data });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

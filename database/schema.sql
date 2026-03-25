@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS messages (
   media_storage_path TEXT, -- path in Supabase Storage
   is_forwarded BOOLEAN DEFAULT false,
   is_read BOOLEAN DEFAULT false,
+  status TEXT DEFAULT 'diterima', -- diterima, diproses, selesai
   matched_keyword TEXT,
   raw_message_id TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()

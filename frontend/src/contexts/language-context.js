@@ -28,6 +28,7 @@ const dictionaries = {
       nav: {
         dashboard: "Dashboard",
         inbox: "Inbox",
+        reports: "Laporan",
         groups: "Groups",
         keywords: "Keywords",
         forwarding: "Forwarding",
@@ -105,6 +106,7 @@ const dictionaries = {
       nav: {
         dashboard: "Dashboard",
         inbox: "Inbox",
+        reports: "Reports",
         groups: "Groups",
         keywords: "Keywords",
         forwarding: "Forwarding",

@@ -23,7 +23,7 @@ export default function TopNavbar({
   showLogout = true,
 }) {
   const router = useRouter();
-  const { text, toggleLanguage } = useLanguage();
+  const { text, language, setLanguage } = useLanguage();
   const [signingOut, setSigningOut] = useState(false);
 
   async function handleLogout() {
@@ -87,16 +87,30 @@ export default function TopNavbar({
       <div className="top-navbar-right">
         <ThemeToggle />
 
-        <button
-          type="button"
-          className="btn btn-secondary btn-sm"
-          onClick={toggleLanguage}
+        <div
+          className="language-switch"
+          role="group"
           aria-label={text.navbar.switchLanguage}
           title={text.navbar.switchLanguage}
         >
-          <Languages size={14} />
-          <span>{text.sidebar.languageButton}</span>
-        </button>
+          <Languages size={13} className="language-switch-icon" />
+          <button
+            type="button"
+            className={`language-switch-btn ${language === "id" ? "active" : ""}`}
+            onClick={() => setLanguage("id")}
+            aria-pressed={language === "id"}
+          >
+            ID
+          </button>
+          <button
+            type="button"
+            className={`language-switch-btn ${language === "en" ? "active" : ""}`}
+            onClick={() => setLanguage("en")}
+            aria-pressed={language === "en"}
+          >
+            EN
+          </button>
+        </div>
 
         {showLogout && (
           <button

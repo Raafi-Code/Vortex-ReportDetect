@@ -2,6 +2,16 @@ import { supabase } from "@/lib/supabase";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
+function buildQueryString(params = {}) {
+  const cleaned = Object.entries(params).filter(([, value]) => {
+    if (value === undefined || value === null) return false;
+    if (typeof value === "string" && value.trim() === "") return false;
+    return true;
+  });
+
+  return new URLSearchParams(cleaned).toString();
+}
+
 function buildLoginUrlFromCurrentLocation() {
   if (typeof window === "undefined") return "/login";
 
@@ -104,29 +114,39 @@ export const deleteKeyword = (id) =>
 
 // ========== Messages ==========
 export const getMessages = (params = {}) => {
-  const query = new URLSearchParams(params).toString();
+  const query = buildQueryString(params);
   return apiRequest(`/api/messages?${query}`);
 };
 export const getMessageStats = () => apiRequest("/api/messages/stats");
 export const getMessageActivityOverTime = (params = {}) => {
-  const query = new URLSearchParams(params).toString();
+  const query = buildQueryString(params);
   return apiRequest(`/api/messages/charts/activity-over-time?${query}`);
 };
 export const getTopGroups = (params = {}) => {
-  const query = new URLSearchParams(params).toString();
+  const query = buildQueryString(params);
   return apiRequest(`/api/messages/charts/top-groups?${query}`);
 };
 export const getTopKeywords = (params = {}) => {
-  const query = new URLSearchParams(params).toString();
+  const query = buildQueryString(params);
   return apiRequest(`/api/messages/charts/top-keywords?${query}`);
 };
 export const getMessage = (id) => apiRequest(`/api/messages/${id}`);
+export const updateMessageStatus = (id, status) =>
+  apiRequest(`/api/messages/${id}/status`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
 export const markAsRead = (id) =>
   apiRequest(`/api/messages/${id}/read`, { method: "PATCH" });
 export const markAllRead = () =>
   apiRequest("/api/messages/read-all", { method: "PATCH" });
 export const deleteMessage = (id) =>
   apiRequest(`/api/messages/${id}`, { method: "DELETE" });
+export const getMessageReports = (params = {}) => {
+  const query = buildQueryString(params);
+  return apiRequest(`/api/messages?${query}`);
+};
 
 // ========== Config ==========
 export const getConfig = () => apiRequest("/api/config");

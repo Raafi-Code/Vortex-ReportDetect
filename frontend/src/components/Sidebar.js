@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   Inbox,
+  FileText,
   Users,
   Hash,
   Forward,
@@ -23,6 +24,7 @@ const navItems = [
   { key: "overview", type: "section" },
   { href: "/", key: "dashboard", icon: LayoutDashboard },
   { href: "/inbox", key: "inbox", icon: Inbox, showBadge: true },
+  { href: "/reports", key: "reports", icon: FileText },
   { key: "manage", type: "section" },
   { href: "/groups", key: "groups", icon: Users },
   { href: "/keywords", key: "keywords", icon: Hash },
