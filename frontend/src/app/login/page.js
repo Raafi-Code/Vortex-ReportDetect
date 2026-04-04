@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Lock, Mail, Languages } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -41,6 +42,7 @@ export default function LoginPage() {
     passwordPlaceholder: isId ? "Masukkan password" : "Enter password",
     processing: isId ? "Memproses..." : "Processing...",
     submit: isId ? "Masuk ke Dashboard" : "Sign In to Dashboard",
+    forgotPassword: isId ? "Lupa Password?" : "Forgot Password?",
   };
 
   const redirectTo = useMemo(
@@ -136,9 +138,14 @@ export default function LoginPage() {
             />
           </div>
 
-          <label className="form-label" htmlFor="password">
-            {t.password}
-          </label>
+          <div className="login-password-header">
+            <label className="form-label" htmlFor="password">
+              {t.password}
+            </label>
+            <Link href="/forgot-password" className="auth-forgot-link">
+              {t.forgotPassword}
+            </Link>
+          </div>
           <div className="login-input-wrap">
             <Lock size={16} />
             <input

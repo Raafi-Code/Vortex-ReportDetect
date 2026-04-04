@@ -42,7 +42,7 @@ const config = {
     trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
   },
   auth: {
-    allowedEmail: (process.env.ALLOWED_LOGIN_EMAIL || "vortex.admin@gmail.com")
+    allowedEmail: (process.env.ALLOWED_LOGIN_EMAIL || "vortex.ryurex@gmail.com")
       .trim()
       .toLowerCase(),
   },

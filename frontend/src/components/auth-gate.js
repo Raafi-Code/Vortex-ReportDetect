@@ -19,7 +19,15 @@ export default function AuthGate({ children }) {
   const pathname = usePathname();
   const [isChecking, setIsChecking] = useState(true);
 
-  const isLoginPage = useMemo(() => pathname === "/login", [pathname]);
+  const isPublicPage = useMemo(
+    () =>
+      pathname === "/login" ||
+      pathname === "/forgot-password" ||
+      pathname === "/reset-password",
+    [pathname],
+  );
+
+  const isResetPage = useMemo(() => pathname === "/reset-password", [pathname]);
 
   useEffect(() => {
     let active = true;
@@ -31,7 +39,7 @@ export default function AuthGate({ children }) {
 
       if (error) {
         await supabase.auth.signOut();
-        if (!isLoginPage) router.replace("/login");
+        if (!isPublicPage) router.replace("/login");
         setIsChecking(false);
         return;
       }
@@ -40,7 +48,7 @@ export default function AuthGate({ children }) {
       const email = user?.email;
 
       if (!user) {
-        if (!isLoginPage) {
+        if (!isPublicPage) {
           router.replace(buildLoginUrl(pathname));
         }
         setIsChecking(false);
@@ -54,7 +62,8 @@ export default function AuthGate({ children }) {
         return;
       }
 
-      if (isLoginPage) {
+      // Don't redirect away from reset-password even if logged in
+      if (pathname === "/login") {
         router.replace("/");
       }
 
@@ -68,10 +77,13 @@ export default function AuthGate({ children }) {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!active) return;
 
+      // Don't interfere with PASSWORD_RECOVERY flow
+      if (_event === "PASSWORD_RECOVERY") return;
+
       const email = session?.user?.email;
 
       if (!session?.user) {
-        if (!isLoginPage) {
+        if (!isPublicPage) {
           router.replace(buildLoginUrl(pathname));
         }
         return;
@@ -83,7 +95,7 @@ export default function AuthGate({ children }) {
         return;
       }
 
-      if (isLoginPage) {
+      if (pathname === "/login") {
         router.replace("/");
       }
     });
@@ -92,9 +104,9 @@ export default function AuthGate({ children }) {
       active = false;
       subscription.unsubscribe();
     };
-  }, [isLoginPage, pathname, router]);
+  }, [isPublicPage, isResetPage, pathname, router]);
 
-  if (isChecking && !isLoginPage) {
+  if (isChecking && !isPublicPage) {
     return (
       <div className="loading-center" style={{ minHeight: "100vh" }}>
         <Loader2 size={28} className="animate-spin" />

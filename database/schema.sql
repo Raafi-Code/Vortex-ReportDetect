@@ -158,7 +158,7 @@ LANGUAGE sql
 STABLE
 AS $$
   SELECT COALESCE(
-    (auth.jwt() ->> 'email') = 'vortex.admin@gmail.com',
+    (auth.jwt() ->> 'email') = 'vortex.ryurex@gmail.com',
     FALSE
   );
 $$;

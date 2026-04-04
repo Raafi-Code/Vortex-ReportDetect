@@ -11,7 +11,13 @@ export default function AppShell({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const isLoginPage = useMemo(() => pathname === "/login", [pathname]);
+  const isAuthPage = useMemo(
+    () =>
+      pathname === "/login" ||
+      pathname === "/forgot-password" ||
+      pathname === "/reset-password",
+    [pathname],
+  );
 
   useEffect(() => {
     setSidebarOpen(false);
@@ -28,13 +34,13 @@ export default function AppShell({ children }) {
     window.localStorage.setItem("sidebar-collapsed", String(sidebarCollapsed));
   }, [sidebarCollapsed]);
 
-  if (isLoginPage) {
+  if (isAuthPage) {
     return (
       <div className="auth-shell">
         <main className="main-content auth-main">
           <div className="main-body">{children}</div>
+          <Footer />
         </main>
-        <Footer />
       </div>
     );
   }

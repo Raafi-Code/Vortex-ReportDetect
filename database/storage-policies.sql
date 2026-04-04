@@ -11,7 +11,7 @@
 --    - Frontend user (single admin) can only READ own app media through signed URLs or direct SELECT policy
 --
 -- Admin email used by policy:
---   vortex.admin@gmail.com
+--   vortex.ryurex@gmail.com
 
 -- --------------------------------------------
 -- Ensure bucket exists and is private
@@ -53,7 +53,7 @@ for select
 to authenticated
 using (
   bucket_id = 'whatsapp-media'
-  and auth.jwt() ->> 'email' = 'vortex.admin@gmail.com'
+  and auth.jwt() ->> 'email' = 'vortex.ryurex@gmail.com'
 );
 
 -- INSERT: only authenticated admin user
@@ -63,7 +63,7 @@ for insert
 to authenticated
 with check (
   bucket_id = 'whatsapp-media'
-  and auth.jwt() ->> 'email' = 'vortex.admin@gmail.com'
+  and auth.jwt() ->> 'email' = 'vortex.ryurex@gmail.com'
 );
 
 -- UPDATE: only authenticated admin user
@@ -73,11 +73,11 @@ for update
 to authenticated
 using (
   bucket_id = 'whatsapp-media'
-  and auth.jwt() ->> 'email' = 'vortex.admin@gmail.com'
+  and auth.jwt() ->> 'email' = 'vortex.ryurex@gmail.com'
 )
 with check (
   bucket_id = 'whatsapp-media'
-  and auth.jwt() ->> 'email' = 'vortex.admin@gmail.com'
+  and auth.jwt() ->> 'email' = 'vortex.ryurex@gmail.com'
 );
 
 -- DELETE: only authenticated admin user
@@ -87,7 +87,7 @@ for delete
 to authenticated
 using (
   bucket_id = 'whatsapp-media'
-  and auth.jwt() ->> 'email' = 'vortex.admin@gmail.com'
+  and auth.jwt() ->> 'email' = 'vortex.ryurex@gmail.com'
 );
 
 -- ============================================
