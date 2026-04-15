@@ -5,7 +5,7 @@
  * @param {object} messageInfo - Message info (text, media buffer, sender, group)
  */
 export async function forwardMessage(sock, targetJid, messageInfo) {
-  const { text, senderName, mediaBuffer, mediaType, mediaMimetype } =
+  const { text, groupName, mediaBuffer, mediaType, mediaMimetype } =
     messageInfo;
 
   // Build forwarding text in requested report format.
@@ -16,8 +16,7 @@ export async function forwardMessage(sock, targetJid, messageInfo) {
 
   const header = [
     `Vortex - ReportDetect`,
-    `━━━━━━━━━━━━━━━━━`,
-    `${senderName || "Unknown"}`,
+    `${groupName || "Unknown"}`,
     `${reportTime} WITA`,
     `${safeText}`,
   ].join("\n");
